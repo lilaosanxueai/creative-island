@@ -1,0 +1,33 @@
+{
+  "id": "basics-04",
+  "island": "basics",
+  "order": 4,
+  "title": "神秘的随机传送门",
+  "emoji": "🌀",
+  "story": "岛心森林里有一只会瞬移的小狐狸！它一直往前走，碰到边缘就会「嗖」地传送到随机地点。想复现这个魔法，你需要「如果」和「随机数」两件法宝。",
+  "goals": ["理解条件判断：如果……就……", "用随机数让程序每次都不一样"],
+  "toolbox": ["island_when_run", "island_when_key", "island_move", "island_turn_right", "island_turn_left", "island_goto", "island_bounce", "island_say", "island_say_for", "island_wait", "island_repeat", "island_forever", "island_if", "island_if_else", "island_touching_edge", "island_key_down", "island_number", "island_random", "island_costume", "island_play"],
+  "actor": { "costume": "🦊", "x": -100, "y": 60 },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "搭出小狐狸的走路循环：「一直重复」里放「移动」",
+      "hintPrompts": ["小狐狸永不停下。「控制」分类里有块积木表示「永不停止地重复」", "「当开始」→「一直重复」→ 嘴里放「移动 5」左右，数字太大它会一头撞墙"],
+      "check": { "type": "block_used", "block": "island_forever" }
+    },
+    {
+      "id": "t2",
+      "text": "在循环里放「如果 碰到边缘？ 那么 ……」：条件用蓝色侦测积木「碰到边缘？」",
+      "hintPrompts": ["传送的条件是「撞到墙了才传送」。橙色「如果」的六边形空位，正好放进蓝色「碰到边缘？」", "「如果」的嘴里先随便放个「说 传送！」测试一下，运行后看它撞墙时说不说"],
+      "check": { "type": "block_used", "block": "island_if" }
+    },
+    {
+      "id": "t3",
+      "text": "把「如果」里的动作换成随机传送：「移到」的 x、y 空位里塞「随机数」积木（x 取 -200~200，y 取 -140~140）",
+      "hintPrompts": ["「移到」的两个空位是圆洞，可以把绿色「随机数」积木塞进去（把默认数字积木拖走换上随机数）", "x 的随机数设 -200 到 200，y 设 -140 到 140，别忘了在「移到」后面加一句「说 嗖——」更有感觉"],
+      "check": { "type": "block_used", "block": "island_random" }
+    }
+  ],
+  "aiIntro": "这节课有魔法！✨ 「如果」让程序学会看情况办事，「随机数」让程序每次都不一样——这两样是几乎所有游戏的灵魂。准备好了吗？",
+  "celebrate": "传送门完成！你集齐了编程的四大法宝：顺序、循环、事件、条件。从下一课开始，就没有标准答案了——全看你的想象力！"
+}

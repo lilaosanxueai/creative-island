@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.local
+.DS_Store
+Thumbs.db
+
+# 本机私密配置与孩子数据，绝不入库
+data/
+!data/.gitkeep

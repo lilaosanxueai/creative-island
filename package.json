@@ -1,0 +1,22 @@
+{
+  "name": "creative-island",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI 创意岛 — 面向 9-12 岁的 AI 编程学习应用（本地自用）",
+  "type": "module",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm:dev -w @island/server\" \"npm:dev -w @island/web\"",
+    "build": "npm run build -w @island/web",
+    "start": "npm run start -w @island/server",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "concurrently": "^9.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

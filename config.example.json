@@ -1,0 +1,16 @@
+{
+  "llm": {
+    "_说明": "任意 OpenAI 兼容接口均可。下面是智谱 GLM 示例；用 DeepSeek 就把 baseURL 换成 https://api.deepseek.com，model 换成 deepseek-chat",
+    "baseURL": "https://open.bigmodel.cn/api/paas/v4",
+    "apiKey": "在这里填你的 API Key",
+    "model": "glm-4.6",
+    "maxTokens": 400
+  },
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "_说明": "想让孩子用平板在同一 WiFi 访问，把 host 改成 0.0.0.0，然后用电脑局域网 IP 访问，如 http://192.168.1.5:8787"
+  },
+  "parentPin": "1234",
+  "_说明": "本文件是模板。首次启动会自动复制到 data/config.json，请只修改 data/config.json（它不会进 git）"
+}

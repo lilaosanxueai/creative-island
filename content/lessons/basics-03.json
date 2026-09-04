@@ -1,0 +1,33 @@
+{
+  "id": "basics-03",
+  "island": "basics",
+  "order": 3,
+  "title": "键盘小赛车",
+  "emoji": "🏎",
+  "story": "岛上的环形赛道完工了！这次不是写好程序看它跑——而是要做出一个「你用键盘控制」的真游戏。按 ↑↓←→ 驾驶赛车，撞到边缘要会反弹哦。",
+  "goals": ["理解事件：程序可以「等待你的指令」再行动", "做出第一个真正能玩的游戏"],
+  "toolbox": ["island_when_run", "island_when_key", "island_when_clicked", "island_key_down", "island_move", "island_turn_right", "island_turn_left", "island_goto", "island_bounce", "island_say", "island_say_for", "island_play"],
+  "actor": { "costume": "🏎", "x": 0, "y": -100 },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "拖一块「当按下 → 键」积木，里面拼上「移动」——点 ▶ 后按右箭头试试",
+      "hintPrompts": ["要让按键「触发」动作，需要的不是「按下某键？」（那是问句），而是黄色事件里的「当按下某键」", "「当按下 → 键」下面拼「移动 30」，然后点 ▶ 运行，再按键盘右箭头"],
+      "check": { "type": "block_used", "block": "island_when_key" }
+    },
+    {
+      "id": "t2",
+      "text": "给 ↑、↓、← 也装上控制（提示：转向可以用「左转/右转 90 度」再移动）",
+      "hintPrompts": ["一个方向一块「当按下某键」。↑ 可以是右转0度直接冲，← 可以先左转90再移动，自己琢磨组合", "一共需要四块「当按下某键」，每块里面用「转」+「移动」组合出不同方向"],
+      "check": { "type": "block_count_min", "block": "island_when_key", "count": 3 }
+    },
+    {
+      "id": "t3",
+      "text": "在每段控制里加上「碰到边缘就反弹」，赛车就不会卡在墙上",
+      "hintPrompts": ["赛车冲出屏幕就找不到了。「运动」分类里有一块专门在撞墙时救场的积木", "把「碰到边缘就反弹」拼在每个方向的「移动」后面"],
+      "check": { "type": "block_used", "block": "island_bounce" }
+    }
+  ],
+  "aiIntro": "游戏时间！🎮 前两课的程序是自己跑的，这一课要让它听你的。秘密就是「事件」——程序安静地等着，你的按键就是命令。做完记得自己试玩！",
+  "celebrate": "你做出了第一个自己能玩的游戏！🎉 「事件」是所有游戏的心跳：按键、点击、开始按钮……世界做什么，程序就回应什么。"
+}

@@ -1,0 +1,104 @@
+# 🏝 AI 创意岛
+
+面向 **9–12 岁**孩子的 AI 编程学习应用（本地自用）。孩子用积木编程做游戏和动画，一个 AI 创意伙伴全程陪伴：出点子、给提示、讲概念、点评作品。
+
+> ⚠️ 本项目是**独立 git 仓库**（父仓库已 ignore），因为里面会存孩子的学习数据、AI 对话记录和 API key——**不要 push 到公开仓库**。
+
+## 功能一览
+
+| 模块 | 说明 |
+|------|------|
+| 🗺 基础岛课程 | 5 课从零到作品：顺序 → 循环 → 事件 → 条件 → 综合发布会，通关解锁 |
+| 🧩 积木工作台 | 22 块中文积木（事件/运动/外观/声音/控制/侦测/运算），拖拽即编程，死循环不会卡死 |
+| 🎭 小剧场 | 画布舞台：角色、说话气泡、目标旗子、边缘反弹、音效（WebAudio 合成，零素材） |
+| 🤖 AI 创意伙伴 | 四模式：💡灵感头脑风暴 / 🆘苏格拉底式三级提示 / 📖生活类比讲解 / 🌟作品点评 |
+| ✨ 自由创造岛 | 全积木开放，随时保存作品 |
+| 🖼 作品墙 | 作品缩略墙 + 放映模式（含键盘事件，游戏类作品可直接玩） |
+| 🛡 家长中心 | PIN 进入：学习进度、**全部 AI 对话记录**、伙伴人设、提示严格度、每日时长提醒 |
+
+## 快速开始
+
+需要 Node.js 18+（开发用 24 验证通过）。
+
+```bat
+:: 双击即可（首次自动安装依赖、构建、生成配置）
+start.bat
+```
+
+然后浏览器打开 **http://127.0.0.1:8787**
+
+### 启用真正的 AI 伙伴（重要）
+
+不配置也能完整游玩（AI 伙伴以离线替身模式回复）。要接上真模型：
+
+1. 用记事本打开 `data/config.json`
+2. 填入任意 OpenAI 兼容接口的 `apiKey`（默认模板是智谱 GLM；DeepSeek 把 `baseURL` 换成 `https://api.deepseek.com`、`model` 换成 `deepseek-chat`）
+3. 重启 `start.bat`
+
+key 只存在本机 `data/config.json`（已被 gitignore），不会入库。
+
+### 让平板在同一 WiFi 玩
+
+`data/config.json` 里把 `server.host` 改成 `"0.0.0.0"`，重启后用电脑的局域网 IP 访问（如 `http://192.168.1.5:8787`）。查 IP：`ipconfig` 看 IPv4 地址。
+
+### 开发模式
+
+```bat
+start-dev.bat   :: server(8787, 热重载) + vite(5173, 热更新)
+```
+
+测试：`npm test`（关卡校验引擎 + 儿童安全过滤的单元测试）。
+
+## 目录结构
+
+```
+creative-island/
+├── apps/
+│   ├── web/            # Vite + React + TS 前端（Blockly 积木、舞台、AI 伙伴 UI）
+│   └── server/         # Express 后端（API、LLM 网关、安全过滤、JSON 存储）
+├── shared/types.ts     # 前后端共享类型
+├── content/lessons/    # 课程内容 JSON（改这里=改课程，改完刷新页面即生效）
+├── data/               # 孩子数据与私密配置（gitignore，永不入库）
+│   ├── config.json     # API key、端口、家长 PIN（默认 1234，请修改）
+│   ├── profiles.json   # 角色档案
+│   ├── progress/       # 学习进度与每日用时
+│   ├── projects/       # 保存的作品
+│   └── chatlogs/       # AI 对话全量记录（家长面板可查）
+├── start.bat           # 一键启动
+└── start-dev.bat       # 开发模式
+```
+
+## 怎么加一节课（不用写代码）
+
+复制 `content/lessons/basics-01.json` 改一改：
+
+- `order`：决定地图上的顺序（第 6 课就写 6）
+- `toolbox`：这节课允许哪些积木（积木类型见 `apps/web/src/blocks/definitions.ts`）
+- `actor` / `targets`：角色初始位置和目标点
+- `tasks[].check`：自动判题规则，支持：
+  - `{"type":"block_used","block":"island_repeat"}` — 用了某积木
+  - `{"type":"block_count_min","block":"island_wait","count":2}` — 某积木至少 N 块
+  - `{"type":"say_text"}` — 角色说过话
+  - `{"type":"actor_reach","targetIndex":0}` — 到达第 N 个目标点
+  - `{"type":"manual"}` — 孩子自己打勾
+- `tasks[].hintPrompts`：AI 给提示时的参考要点（从方向到差一步，写 2–3 条）
+
+保存后刷新页面即生效。
+
+## 儿童安全设计
+
+- AI 对话被限制在编程创作话题内；出话题会被温柔拉回
+- 孩子输入含手机号/住址等个人信息时**不转发给大模型**，直接提示保护隐私
+- 模型输出自动剥除所有链接
+- **每一次对话全量落盘**，家长面板按日期可查
+- 无公开社交、无广告、无内购；数据全部存在本机
+
+## 技术栈
+
+Vite 7 · React 19 · TypeScript · Tailwind CSS 4 · Blockly 11（zelos 渲染器 + 自定义中文积木）· zustand · Express 5 · tsx 运行时。执行器把积木编译成带 guard 的 async JS 在页面内沙箱执行——孩子的死循环不会卡死页面，⏹ 随时可停
+
+## 后续路线（见设计文档）
+
+- L3 积木 ⇄ Python 双视图（向文字代码过渡）
+- AI 训练场（Teachable Machine 式：孩子训练自己的识别模型）
+- 语音输入、更多课程包、作品导出为独立 HTML 分享亲友

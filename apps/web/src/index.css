@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: linear-gradient(180deg, #e0f2fe 0%, #fef9c3 100%);
+  overscroll-behavior: none;
+}
+
+/* Blockly 容器需要显式尺寸 */
+.blockly-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* Blockly 儿童化：大字号 */
+.blocklyWrap .blocklyText {
+  font-size: 16px !important;
+  font-family: inherit !important;
+}
+.blocklyWrap .blocklyDropdownText {
+  font-size: 15px !important;
+}
+.blocklyWrap input.blocklyHtmlInput {
+  font-size: 16px !important;
+}
+.blocklyWrap .blocklyToolboxCategoryLabel {
+  font-size: 15px !important;
+}
+
+/* 滚动条柔和一点 */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
