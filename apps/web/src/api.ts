@@ -27,6 +27,8 @@ export const api = {
     req<Project>('/api/projects', { method: 'POST', body: JSON.stringify(p) }),
   deleteProject: (profileId: string, id: string) =>
     req<{ ok: boolean }>(`/api/projects/${id}?profileId=${profileId}`, { method: 'DELETE' }),
+  likeProject: (profileId: string, id: string, likerId: string) =>
+    req<Project>(`/api/projects/${id}/like?profileId=${profileId}`, { method: 'POST', body: JSON.stringify({ likerId }) }),
   settings: () => req<Settings>('/api/settings'),
   saveSettings: (s: Settings, pin: string) =>
     req<Settings>('/api/settings', { method: 'PUT', body: JSON.stringify(s), headers: { 'x-parent-pin': pin } }),

@@ -4,6 +4,7 @@ import MapScreen from './screens/MapScreen.tsx';
 import WorkshopScreen from './screens/WorkshopScreen.tsx';
 import GalleryScreen from './screens/GalleryScreen.tsx';
 import ParentScreen from './screens/ParentScreen.tsx';
+import CertificateScreen from './screens/CertificateScreen.tsx';
 
 function LessonRoute() {
   const { id } = useParams();
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/freeplay" element={<WorkshopScreen mode={{ kind: 'freeplay' }} />} />
         <Route path="/gallery" element={<GalleryScreen />} />
         <Route path="/parent" element={<ParentScreen />} />
+        <Route path="/certificate" element={<CertificateScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>

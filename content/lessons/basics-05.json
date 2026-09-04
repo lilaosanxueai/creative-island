@@ -1,32 +1,79 @@
 {
   "id": "basics-05",
   "island": "basics",
-  "order": 5,
+  "order": 6,
   "title": "我的小游戏发布会",
   "emoji": "🏆",
   "story": "结业发布会！这一课没有任务清单、没有标准答案——你要和 AI 搭档一起想出一个属于自己的点子，把它做出来，挂上作品墙，向全家发布！",
-  "goals": ["完整走一遍：想点子 → 拆步骤 → 做出来 → 发布", "学会向 AI 描述自己想要什么"],
-  "toolbox": ["island_when_run", "island_when_key", "island_when_clicked", "island_move", "island_turn_right", "island_turn_left", "island_goto", "island_bounce", "island_say", "island_say_for", "island_costume", "island_change_size", "island_show", "island_hide", "island_play", "island_repeat", "island_forever", "island_wait", "island_if", "island_if_else", "island_touching_edge", "island_key_down", "island_number", "island_random"],
-  "actor": { "costume": "🌟", "x": 0, "y": 0 },
+  "goals": [
+    "完整走一遍：想点子 → 拆步骤 → 做出来 → 发布",
+    "学会向 AI 描述自己想要什么"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_when_key",
+    "island_when_clicked",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_bounce",
+    "island_say",
+    "island_say_for",
+    "island_costume",
+    "island_change_size",
+    "island_show",
+    "island_hide",
+    "island_play",
+    "island_repeat",
+    "island_forever",
+    "island_wait",
+    "island_if",
+    "island_if_else",
+    "island_touching_edge",
+    "island_key_down",
+    "island_number",
+    "island_random"
+  ],
+  "actor": {
+    "costume": "🌟",
+    "x": 0,
+    "y": 0
+  },
   "freeplayLesson": true,
   "tasks": [
     {
       "id": "t1",
       "text": "点右边的 💡灵感，和搭档聊出 3 个点子，选出最想做的那个",
-      "hintPrompts": ["告诉搭档你喜欢什么：追来追去的？吓人一跳的？会讲笑话的？", "点子不怕怪！越是你自己的点子越好"],
-      "check": { "type": "manual" }
+      "hintPrompts": [
+        "告诉搭档你喜欢什么：追来追去的？吓人一跳的？会讲笑话的？",
+        "点子不怕怪！越是你自己的点子越好"
+      ],
+      "check": {
+        "type": "manual"
+      }
     },
     {
       "id": "t2",
       "text": "把点子做出来：至少用上 8 块积木（点 🆘提示 可以让搭档帮你拆步骤）",
-      "hintPrompts": ["先做最简单的一小步，能跑起来再加东西——大作品都是一小步一小步长出来的", "卡住就问搭档，或者按 ▶ 多试几次，改一改再试"],
-      "check": { "type": "block_count_total_min", "count": 8 }
+      "hintPrompts": [
+        "先做最简单的一小步，能跑起来再加东西——大作品都是一小步一小步长出来的",
+        "卡住就问搭档，或者按 ▶ 多试几次，改一改再试"
+      ],
+      "check": {
+        "type": "block_count_total_min",
+        "count": 8
+      }
     },
     {
       "id": "t3",
       "text": "点上面的「💾 存作品」给它起个响亮的名字，挂上作品墙",
-      "hintPrompts": ["名字要一听就想玩！比如《幽灵快跑》《会说话的蛋糕》"],
-      "check": { "type": "manual" }
+      "hintPrompts": [
+        "名字要一听就想玩！比如《幽灵快跑》《会说话的蛋糕》"
+      ],
+      "check": {
+        "type": "manual"
+      }
     }
   ],
   "aiIntro": "发布会时间！🎤 我已经准备好帮你头脑风暴了。告诉我：你想做一个什么东西？越具体越好——我们一起把它拆成一块一块的积木！",

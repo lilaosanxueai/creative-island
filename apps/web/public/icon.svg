@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="#38bdf8"/>
+  <circle cx="92" cy="34" r="14" fill="#fbbf24"/>
+  <path d="M8 96 L40 60 L64 84 L88 52 L120 96 Z" fill="#34d399"/>
+  <path d="M8 96 L40 60 L64 84 L88 52 L120 96 Z" fill="none" stroke="#10b981" stroke-width="4" stroke-linejoin="round"/>
+  <rect x="4" y="96" width="120" height="14" rx="7" fill="#fbbf24"/>
+  <text x="24" y="52" font-size="30" font-family="sans-serif">🤖</text>
+</svg>

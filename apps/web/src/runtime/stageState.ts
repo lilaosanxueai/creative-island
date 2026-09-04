@@ -7,6 +7,14 @@ export const STAGE_H = 360;
 const BOUND_X = STAGE_W / 2 - 20;
 const BOUND_Y = STAGE_H / 2 - 20;
 
+/** 运行速度三档：慢（看清楚每一步）/ 正常 / 快。乘在所有停顿时长上 */
+export type RunSpeed = 'slow' | 'normal' | 'fast';
+const SPEED_FACTOR: Record<RunSpeed, number> = { slow: 2.5, normal: 1, fast: 0.4 };
+let runSpeed: RunSpeed = 'normal';
+
+export function setRunSpeed(s: RunSpeed): void { runSpeed = s; }
+export function getRunSpeed(): RunSpeed { return runSpeed; }
+
 export interface StageTargetState extends StageTarget { reached: boolean }
 
 /** 小剧场状态机：角色状态 + 命令 API + 运行证据（供关卡校验） */
@@ -55,39 +63,39 @@ export class StageState {
       this.x = clamp(this.x + steps * Math.sin(rad), -BOUND_X, BOUND_X);
       this.y = clamp(this.y + steps * Math.cos(rad), -BOUND_Y, BOUND_Y);
       this.reachCheck();
-      await sleep(60);
+      await scaled(60);
     },
-    turnRight: async (deg: number) => { this.dir = norm(this.dir + deg); await sleep(60); },
-    turnLeft: async (deg: number) => { this.dir = norm(this.dir - deg); await sleep(60); },
+    turnRight: async (deg: number) => { this.dir = norm(this.dir + deg); await scaled(60); },
+    turnLeft: async (deg: number) => { this.dir = norm(this.dir - deg); await scaled(60); },
     goTo: async (x: number, y: number) => {
       this.x = clamp(x, -BOUND_X, BOUND_X);
       this.y = clamp(y, -BOUND_Y, BOUND_Y);
       this.reachCheck();
-      await sleep(60);
+      await scaled(60);
     },
     bounce: async () => {
       const hitX = Math.abs(this.x) >= BOUND_X - 1;
       const hitY = Math.abs(this.y) >= BOUND_Y - 1;
       if (hitX) this.dir = norm(-this.dir);
       if (hitY) this.dir = norm(180 - this.dir);
-      await sleep(40);
+      await scaled(40);
     },
     say: async (text: string) => {
       if (text) this.saidTexts.push(text);
       this.bubble = { text, until: performance.now() + 2600 };
-      await sleep(200);
+      await scaled(200);
     },
     sayFor: async (text: string, secs: number) => {
       if (text) this.saidTexts.push(text);
       this.bubble = { text, until: performance.now() + secs * 1000 };
-      await sleep(secs * 1000);
+      await scaled(secs * 1000);
       this.bubble = null;
     },
-    costume: async (c: string) => { this.costume = c; await sleep(60); },
-    changeSize: async (n: number) => { this.size = clamp(this.size + n, 10, 400); await sleep(40); },
-    show: async () => { this.visible = true; await sleep(40); },
-    hide: async () => { this.visible = false; this.bubble = null; await sleep(40); },
-    play: async (name: string) => { playSound(name); await sleep(220); },
+    costume: async (c: string) => { this.costume = c; await scaled(60); },
+    changeSize: async (n: number) => { this.size = clamp(this.size + n, 10, 400); await scaled(40); },
+    show: async () => { this.visible = true; await scaled(40); },
+    hide: async () => { this.visible = false; this.bubble = null; await scaled(40); },
+    play: async (name: string) => { playSound(name); await scaled(220); },
     wait: async (secs: number) => { await sleep(Math.max(0.1, secs) * 1000); },
     touchingEdge: (): boolean => Math.abs(this.x) >= BOUND_X - 15 || Math.abs(this.y) >= BOUND_Y - 15,
     keyDown: (key: string): boolean => this.keysHeld.has(key),
@@ -101,3 +109,5 @@ export class StageState {
 function clamp(v: number, lo: number, hi: number): number { return Math.min(hi, Math.max(lo, v)); }
 function norm(deg: number): number { return ((deg % 360) + 360) % 360; }
 export function sleep(ms: number): Promise<void> { return new Promise((r) => setTimeout(r, ms)); }
+/** 受运行速度档位影响的停顿 */
+function scaled(ms: number): Promise<void> { return sleep(ms * SPEED_FACTOR[runSpeed]); }

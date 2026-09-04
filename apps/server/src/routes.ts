@@ -47,11 +47,14 @@ export function buildRouter(cfg: AppConfig): Router {
   // ---------- 进度 ----------
   r.get('/progress/:profileId', (req, res) => res.json(store.getProgress(req.params.profileId)));
   r.put('/progress/:profileId', (req, res) => {
-    const { lessonId, tasks, completed, minutesDelta } = req.body ?? {};
+    const { lessonId, tasks, completed, minutesDelta, draft } = req.body ?? {};
     if (minutesDelta != null && (typeof minutesDelta !== 'number' || minutesDelta > 5)) {
       return res.status(400).json({ error: 'minutesDelta 每次最多 5 分钟' });
     }
-    res.json(store.mergeProgress(req.params.profileId, { lessonId, tasks, completed, minutesDelta }));
+    if (draft != null && typeof draft !== 'string') {
+      return res.status(400).json({ error: 'draft 需要是字符串' });
+    }
+    res.json(store.mergeProgress(req.params.profileId, { lessonId, tasks, completed, minutesDelta, draft }));
   });
 
   // ---------- 作品 ----------
@@ -71,6 +74,14 @@ export function buildRouter(cfg: AppConfig): Router {
     if (!profileId) return res.status(400).json({ error: '缺少 profileId' });
     store.deleteProject(profileId, req.params.id);
     res.json({ ok: true });
+  });
+  r.post('/projects/:id/like', (req, res) => {
+    const { likerId } = req.body ?? {};
+    const profileId = String(req.query.profileId ?? '');
+    if (!profileId || !likerId) return res.status(400).json({ error: '缺少 profileId 或 likerId' });
+    const proj = store.toggleProjectLike(profileId, req.params.id, likerId);
+    if (!proj) return res.status(404).json({ error: '作品不存在' });
+    res.json(proj);
   });
 
   // ---------- 设置 ----------

@@ -1,0 +1,98 @@
+{
+  "id": "basics-05-fix",
+  "island": "basics",
+  "order": 5,
+  "title": "修复挑战：机器人生病了",
+  "emoji": "🩹",
+  "story": "篝火晚会上 rusty 的舞跳出了 bug：它抖得像触电，一点也不像跳舞！现在你是创意岛的程序医生——生病的程序不可怕，找到病灶、治好它，这就是「调试」，程序员的看家本领。",
+  "goals": [
+    "学会发现问题：先运行，观察哪里不对劲",
+    "理解「调试」：修改 → 再运行 → 再观察",
+    "明白程序出错是创作的正常一部分"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_costume",
+    "island_change_size",
+    "island_repeat",
+    "island_wait",
+    "island_play",
+    "island_number"
+  ],
+  "starterXml": "<xml xmlns=\"https://developers.google.com/blockly/xml\"><block type=\"island_when_run\" id=\"sick1\" x=\"60\" y=\"40\"><next><block type=\"island_say\" id=\"sick2\"><field name=\"TEXT\">看我跳舞！</field><next><block type=\"island_repeat\" id=\"sick3\"><field name=\"TIMES\">6</field><statement name=\"STACK\"><block type=\"island_turn_right\" id=\"sick4\"><field name=\"DEG\">20</field><next><block type=\"island_turn_left\" id=\"sick5\"><field name=\"DEG\">20</field></block></next></block></statement></block></next></block></next></block></xml>",
+  "actor": {
+    "costume": "🤖",
+    "x": 0,
+    "y": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "当一回医生：先点 ▶ 给生病的程序做个「检查」，看清它哪里不对劲（看完了给自己打勾）",
+      "hintPrompts": [
+        "别急着改，先运行一遍，仔细看机器人的动作像不像跳舞"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "诊断病灶：它抖得太快了，因为动作之间没有停顿。用「等待」积木治好它（至少加 2 块）",
+      "hintPrompts": [
+        "把 6 次重复里的动作放慢：每个动作后面停一小会儿，比如 0.3 秒",
+        "「等待」积木放在「右转」和「左转」的后面，试着加进去再运行对比"
+      ],
+      "check": {
+        "type": "block_count_min",
+        "block": "island_wait",
+        "count": 2
+      }
+    },
+    {
+      "id": "t3",
+      "text": "康复训练：让舞蹈更有花样——在重复里加「换造型」或「大小改变」，看起来不像抽筋为止",
+      "hintPrompts": [
+        "试试在重复里加「变成 🦊」或者「大小改变 20」，机器人会看起来活泼很多",
+        "改完记得再点 ▶ 看效果，医生也要复查的！"
+      ],
+      "check": {
+        "type": "block_used_any",
+        "blocks": [
+          "island_costume",
+          "island_change_size"
+        ]
+      }
+    },
+    {
+      "id": "t4",
+      "text": "出院宣言：让 rusty 说一句「我康复啦！」之类的话",
+      "hintPrompts": [
+        "在程序的最后加一块「说」积木",
+        "开头已经有一块「说」，你可以在重复后面再加一块"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 神医挑战：给这段舞蹈配上一段音效节奏",
+      "hintPrompts": [
+        "「播放声音」放进重复里，每次动作都响一下，就是节奏啦"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_play"
+      },
+      "optional": true
+    }
+  ],
+  "aiIntro": "咦，rusty 看起来不太舒服 🤒 别慌！每个伟大的创作者都会遇到 bug——找到它、治好它，这个本领叫「调试」，比会写程序还厉害。先点 ▶ 看看它病得怎么样？",
+  "celebrate": "手术成功！🩺 你刚刚学会了创作者最重要的心态：程序出问题≠失败，它只是一个等你来解的谜题。有了调试本领，你再也不怕任何 bug 了！"
+}

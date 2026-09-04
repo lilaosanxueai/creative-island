@@ -9,6 +9,7 @@ export interface Profile {
 
 export type CheckRule =
   | { type: 'block_used'; block: string }
+  | { type: 'block_used_any'; blocks: string[] }
   | { type: 'block_count_min'; block: string; count: number }
   | { type: 'block_count_total_min'; count: number }
   | { type: 'say_text' }
@@ -21,6 +22,8 @@ export interface LessonTask {
   /** 分级提示词（AI 提示模式的参考材料，从方向到搭法） */
   hintPrompts: string[];
   check: CheckRule;
+  /** ⭐挑战任务：选做，不计入通关条件 */
+  optional?: boolean;
 }
 
 export interface StageTarget {
@@ -66,6 +69,8 @@ export interface ProfileProgress {
   lessons: Record<string, LessonProgress>;
   /** 每日使用分钟数，键为 YYYY-MM-DD */
   dailyUsage: Record<string, number>;
+  /** 每课的画布草稿（XML），离开后自动恢复 */
+  lessonDrafts: Record<string, string>;
 }
 
 export interface Project {
@@ -79,6 +84,8 @@ export interface Project {
   lessonId?: string;
   /** 保存时的舞台配置，作品墙放映时还原 */
   stage?: { actor: Lesson['actor']; targets?: StageTarget[] };
+  /** 给作品点过 ❤️ 的角色 id 列表（家庭点赞） */
+  likes?: string[];
   createdAt: string;
   updatedAt: string;
 }

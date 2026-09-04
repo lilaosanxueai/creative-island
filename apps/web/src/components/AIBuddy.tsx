@@ -5,6 +5,8 @@ import { chatStream } from '../api.ts';
 export interface BuddyHandle {
   /** 从任务面板/灵感卡片跳进来提问 */
   askInMode: (mode: BuddyMode, text: string) => void;
+  /** 本地喝彩/提示（不调用大模型，零成本即时反馈） */
+  sayLocal: (text: string) => void;
 }
 
 interface Props {
@@ -31,6 +33,22 @@ const QUICK: Record<BuddyMode, string[]> = {
 
 const URL_RE = /https?:\/\/\S+|www\.\S+/g;
 
+/** 浏览器语音识别的最小类型面 */
+interface SpeechRecognitionLike {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start(): void;
+  stop(): void;
+  onresult: ((ev: SpeechEventLike) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+}
+interface SpeechEventLike {
+  resultIndex: number;
+  results: ArrayLike<{ isFinal: boolean; 0: { transcript: string } }>;
+}
+
 const AIBuddy = forwardRef<BuddyHandle, Props>(function AIBuddy(
   { profileId, buddy, intro, defaultMode, getContext },
   ref,
@@ -39,6 +57,7 @@ const AIBuddy = forwardRef<BuddyHandle, Props>(function AIBuddy(
   const [messages, setMessages] = useState<(ChatMessage & { streaming?: boolean })[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [listening, setListening] = useState(false);
   const listEnd = useRef<HTMLDivElement>(null);
   const modeRef = useRef(mode);
   modeRef.current = mode;
@@ -103,7 +122,44 @@ const AIBuddy = forwardRef<BuddyHandle, Props>(function AIBuddy(
       setMode(m);
       void send(text, m);
     },
+    sayLocal: (text) => {
+      setMessages((prev) => [...prev, { role: 'assistant', content: text, mode: modeRef.current }]);
+    },
   }));
+
+  // ---------- 语音输入（浏览器不支持时按钮自动隐藏） ----------
+  const SR = (typeof window !== 'undefined'
+    ? (window as unknown as { SpeechRecognition?: unknown; webkitSpeechRecognition?: unknown })
+    : {}) as { SpeechRecognition?: new () => SpeechRecognitionLike; webkitSpeechRecognition?: new () => SpeechRecognitionLike };
+  const SRClass = SR.SpeechRecognition ?? SR.webkitSpeechRecognition;
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+
+  const toggleMic = () => {
+    if (!SRClass) return;
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const rec = new SRClass();
+    rec.lang = 'zh-CN';
+    rec.interimResults = true;
+    rec.continuous = false;
+    let finalText = '';
+    rec.onresult = (ev: SpeechEventLike) => {
+      let interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const r = ev.results[i];
+        if (r.isFinal) finalText += r[0].transcript;
+        else interim += r[0].transcript;
+      }
+      setInput((finalText + interim).trim().slice(0, 200));
+    };
+    rec.onend = () => setListening(false);
+    rec.onerror = () => setListening(false);
+    recognitionRef.current = rec;
+    try { rec.start(); setListening(true); } catch { setListening(false); }
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white/90 p-3 shadow-md">
@@ -167,10 +223,22 @@ const AIBuddy = forwardRef<BuddyHandle, Props>(function AIBuddy(
           void send(input);
         }}
       >
+        {SRClass && (
+          <button
+            type="button"
+            onClick={toggleMic}
+            title={listening ? '正在听…点一下停止' : '按住说话（语音输入）'}
+            className={`shrink-0 rounded-xl px-3 text-xl transition ${
+              listening ? 'animate-pulse bg-rose-500 text-white' : 'bg-slate-200 hover:bg-slate-300'
+            }`}
+          >
+            {listening ? '🔴' : '🎤'}
+          </button>
+        )}
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={`和 ${buddy.name} 说说想法…`}
+          placeholder={listening ? '我在听你说…' : `和 ${buddy.name} 说说想法…`}
           maxLength={200}
           className="min-w-0 flex-1 rounded-xl border border-slate-300 px-3 py-2 text-[15px] outline-none focus:border-sky-400"
         />

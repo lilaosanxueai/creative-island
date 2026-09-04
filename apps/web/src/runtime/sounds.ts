@@ -1,6 +1,14 @@
 /** WebAudio 合成音效，零素材依赖 */
 
 let ctx: AudioContext | null = null;
+let muted = localStorage.getItem('island-muted') === '1';
+
+export function isMuted(): boolean { return muted; }
+
+export function setMuted(next: boolean): void {
+  muted = next;
+  localStorage.setItem('island-muted', next ? '1' : '0');
+}
 
 function audio(): AudioContext {
   if (!ctx) ctx = new AudioContext();
@@ -22,6 +30,7 @@ function tone(freq: number, start: number, dur: number, type: OscillatorType = '
 }
 
 export function playSound(name: string): void {
+  if (muted) return;
   try {
     switch (name) {
       case 'ding': tone(880, 0, 0.3); tone(1320, 0.08, 0.4); break;

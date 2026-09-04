@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import type { BuddyMode, ChatContext, Lesson, Settings } from '@shared/types.ts';
 import { DEFAULT_SETTINGS } from '@shared/types.ts';
 import { api } from '../api.ts';
@@ -10,9 +10,10 @@ import TaskPanel from '../components/TaskPanel.tsx';
 import AIBuddy, { type BuddyHandle } from '../components/AIBuddy.tsx';
 import { buildToolbox } from '../blocks/toolbox.ts';
 import { ALL_BLOCK_TYPES, BLOCK_LABELS } from '../blocks/definitions.ts';
-import { StageState } from '../runtime/stageState.ts';
+import { StageState, setRunSpeed, getRunSpeed, type RunSpeed } from '../runtime/stageState.ts';
+import { playSound, isMuted, setMuted } from '../runtime/sounds.ts';
 import { Executor } from '../runtime/executor.ts';
-import { evaluateTasks, type RunEvidence } from '../runtime/validators.ts';
+import { evaluateTasks, requiredTasksDone, type RunEvidence } from '../runtime/validators.ts';
 
 export interface WorkshopMode {
   kind: 'lesson' | 'freeplay';
@@ -40,12 +41,24 @@ const IDEAS = [
   { emoji: '🎹', title: '键盘钢琴', desc: '按不同键播放不同声音，弹一首小曲子' },
 ];
 
+const SPEED_LABEL: Record<RunSpeed, string> = { slow: '🐢 慢速', normal: '▶ 常速', fast: '🐇 快速' };
+
+/** 任务完成喝彩：夸努力和方法，不夸聪明（教育设计的经典原则） */
+const CHEERS = [
+  (t: string) => `🎉 又完成一步！「${t}」被你搞定了——你刚才自己动手试的那几下特别关键！`,
+  (t: string) => `✅ 漂亮！我注意到你刚才调整了积木再试了一次，这就叫「试错精神」，创作者都靠它！`,
+  (t: string) => `💪 帅啊！「${t}」完成！遇到卡点你没有放弃，这一点我最佩服！`,
+];
+
 export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
   const nav = useNavigate();
   const { current: profile } = useProfileStore();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [draftXml, setDraftXml] = useState<string | null>(null);
+  const [progressReady, setProgressReady] = useState(false);
+  const [wsReady, setWsReady] = useState(false);
   const [running, setRunning] = useState(false);
   const [taskDone, setTaskDone] = useState<Record<string, boolean>>({});
   const [lessonCompleted, setLessonCompleted] = useState(false);
@@ -54,6 +67,10 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveTitle, setSaveTitle] = useState('');
   const [toast, setToast] = useState<string | null>(null);
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [codeText, setCodeText] = useState('');
+  const [speed, setSpeed] = useState<RunSpeed>(getRunSpeed());
+  const [muted, setMutedState] = useState(isMuted());
 
   const wsApiRef = useRef<WorkspaceApi | null>(null);
   const stageRef = useRef(new StageState());
@@ -64,6 +81,8 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
   taskDoneRef.current = taskDone;
   const completedRef = useRef(lessonCompleted);
   completedRef.current = lessonCompleted;
+  const cheerIdx = useRef(0);
+  const draftTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   // ---------- 加载课程与设置 ----------
   useEffect(() => {
@@ -77,23 +96,33 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
       ]);
       if (!alive) return;
       setSettings(s);
-      if (!l) { setToast('找不到这一课'); return; }
+      setWsReady(false);
+      if (!l) { setToast('找不到这一课'); setProgressReady(true); return; }
       setLesson(l);
       stageRef.current.reset(l.actor, l.targets);
+      setProgressReady(false);
       if (profile) {
-        api.progress(profile.id)
-          .then((p) => {
-            const lp = p.lessons[l.id];
-            if (lp) {
-              setTaskDone(Object.fromEntries(Object.entries(lp.tasks).map(([k, v]) => [k, v.done])));
-              setLessonCompleted(lp.status === 'completed');
-            }
-          })
-          .catch(() => { /* 首次学习无进度 */ });
+        try {
+          const p = await api.progress(profile.id);
+          if (!alive) return;
+          const lp = p.lessons[l.id];
+          if (lp) {
+            setTaskDone(Object.fromEntries(Object.entries(lp.tasks).map(([k, v]) => [k, v.done])));
+            setLessonCompleted(lp.status === 'completed');
+          }
+          setDraftXml(p.lessonDrafts?.[l.id] ?? null);
+        } catch { /* 首次学习无进度 */ }
       }
+      if (alive) setProgressReady(true);
     })();
-    return () => { alive = false; };
+    return () => { alive = false; clearTimeout(draftTimer.current); };
   }, [mode.kind, mode.lessonId, profile]);
+
+  // 画布挂载 + 进度就绪后，显式载入草稿（有草稿用草稿，否则保留课程初始积木）
+  useEffect(() => {
+    if (!wsReady || !progressReady || !lesson || !wsApiRef.current) return;
+    if (draftXml) wsApiRef.current.loadXml(draftXml);
+  }, [wsReady, progressReady, lesson, draftXml]);
 
   // ---------- 运行 ----------
   const collectEvidence = useCallback((hasRun: boolean): RunEvidence => {
@@ -108,18 +137,28 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
 
   const maybeComplete = useCallback((next: Record<string, boolean>) => {
     if (!lesson || lesson.tasks.length === 0) return;
-    const all = lesson.tasks.every((t) => next[t.id]);
-    if (!all || completedRef.current) return;
+    if (!requiredTasksDone(lesson.tasks, next) || completedRef.current) return;
     setLessonCompleted(true);
     setCelebrate(true);
     if (profile) {
-      void api.updateProgress(profile.id, { lessonId: lesson.id, tasks: next, completed: true }).catch(() => {});
+      void api.updateProgress(profile.id, {
+        lessonId: lesson.id, tasks: next, completed: true,
+        draft: wsApiRef.current?.getXml(),
+      }).catch(() => {});
     }
   }, [lesson, profile]);
 
   const revalidate = useCallback((hasRun: boolean) => {
     if (!lesson || lesson.tasks.length === 0) return;
     const next = evaluateTasks(lesson.tasks, collectEvidence(hasRun), taskDoneRef.current);
+    // 新亮起的必做任务 → 伙伴本地喝彩（不耗 token）。先在 setState 外算好，避免副作用塞进 updater
+    const newly = lesson.tasks.find(
+      (t) => !t.optional && next[t.id] && !taskDoneRef.current[t.id],
+    );
+    if (newly) {
+      buddyRef.current?.sayLocal(CHEERS[cheerIdx.current % CHEERS.length](newly.text.slice(0, 22)));
+      cheerIdx.current++;
+    }
     setTaskDone((prev) => {
       const changed = lesson.tasks.some((t) => next[t.id] !== prev[t.id]);
       return changed ? next : prev;
@@ -143,6 +182,18 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
     setRunning(false);
     revalidate(true);
   };
+
+  // ---------- 工作区变化：校验 + 草稿自动保存 ----------
+  const handleWorkspaceChange = useCallback(() => {
+    revalidate(false);
+    if (!lesson || !profile || !wsApiRef.current) return;
+    // 立即快照 XML：防抖等待期间 workspace 可能被销毁（切课/关页）
+    const xml = wsApiRef.current.getXml();
+    clearTimeout(draftTimer.current);
+    draftTimer.current = setTimeout(() => {
+      void api.updateProgress(profile.id, { lessonId: lesson.id, draft: xml }).catch(() => {});
+    }, 1500);
+  }, [revalidate, lesson, profile]);
 
   // ---------- 键盘（运行中生效） ----------
   useEffect(() => {
@@ -254,27 +305,45 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
 
   const toolbox = useMemo(() => buildToolbox(lesson?.toolbox ?? ALL_BLOCK_TYPES), [lesson]);
 
+  // ---------- 工具条动作 ----------
+  const cycleSpeed = () => {
+    const order: RunSpeed[] = ['normal', 'slow', 'fast'];
+    const next = order[(order.indexOf(speed) + 1) % order.length];
+    setSpeed(next);
+    setRunSpeed(next);
+    setToast(next === 'slow' ? '🐢 慢速模式：看清楚程序一步一步怎么走！' : next === 'fast' ? '🐇 快速模式！' : '▶ 常速模式');
+  };
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void document.documentElement.requestFullscreen().catch(() => setToast('这台设备不支持全屏'));
+  };
+  const toggleMute = () => {
+    setMuted(!muted);
+    setMutedState(!muted);
+    if (muted) playSound('ding');
+  };
+
   if (!profile) {
-    return <Center><button className="kid-btn" onClick={() => nav('/')}>先选一个角色吧 👋</button></Center>;
+    return <Center><button className="rounded-xl bg-sky-500 px-6 py-3 font-bold text-white" onClick={() => nav('/')}>先选一个角色吧 👋</button></Center>;
   }
   if (!lesson) {
     return <Center>正在打开工作台…</Center>;
   }
 
-  const doneCount = lesson.tasks.filter((t) => taskDone[t.id]).length;
-
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       {/* 顶栏 */}
-      <header className="flex items-center gap-3 bg-white/70 px-4 py-2 backdrop-blur">
+      <header className="flex items-center gap-2 bg-white/70 px-3 py-2 backdrop-blur">
         <button onClick={() => nav('/map')} className="rounded-xl bg-slate-200 px-3 py-1.5 font-bold hover:bg-slate-300">← 地图</button>
         <h1 className="text-lg font-black">{lesson.emoji} {lesson.title}</h1>
         {lesson.tasks.length > 0 && (
-          <span className={`rounded-full px-3 py-1 text-sm font-bold ${doneCount === lesson.tasks.length ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-800'}`}>
-            任务 {doneCount}/{lesson.tasks.length}
+          <span className={`rounded-full px-3 py-1 text-sm font-bold ${
+            requiredTasksDone(lesson.tasks, taskDone) ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-800'
+          }`}>
+            任务 {lesson.tasks.filter((t) => !t.optional && taskDone[t.id]).length}/{lesson.tasks.filter((t) => !t.optional).length}
           </span>
         )}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1.5">
           <button onClick={() => setSaveOpen(true)} className="rounded-xl bg-violet-500 px-3 py-1.5 font-bold text-white hover:bg-violet-600">💾 存作品</button>
           <button
             onClick={() => setBuddyOpen((v) => !v)}
@@ -284,6 +353,20 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
           </button>
         </div>
       </header>
+
+      {/* 工具条 */}
+      <div className="flex items-center gap-1.5 bg-white/50 px-3 pb-1.5 text-sm">
+        <ToolBtn title="撤销（放错积木不要紧）" onClick={() => wsApiRef.current?.workspace.undo(false)}>↩️ 撤销</ToolBtn>
+        <ToolBtn title="重做" onClick={() => wsApiRef.current?.workspace.undo(true)}>↪️ 重做</ToolBtn>
+        <ToolBtn title="把积木排整齐" onClick={() => wsApiRef.current?.workspace.cleanUp()}>🧹 整理</ToolBtn>
+        <span className="mx-1 text-slate-300">|</span>
+        <ToolBtn title="切换运行速度：慢速能看清每一步" onClick={cycleSpeed}>{SPEED_LABEL[speed]}</ToolBtn>
+        <ToolBtn title="看看你的积木变成了什么代码" onClick={() => { setCodeText(wsApiRef.current?.getCode() ?? ''); setCodeOpen(true); }}>👀 魔法代码</ToolBtn>
+        <span className="mx-1 text-slate-300">|</span>
+        <ToolBtn title={muted ? '打开音效' : '关掉音效'} onClick={toggleMute}>{muted ? '🔇' : '🔊'}</ToolBtn>
+        <ToolBtn title="全屏（更像一台游戏机）" onClick={toggleFullscreen}>⛶ 全屏</ToolBtn>
+        <span className="ml-auto pr-1 text-xs text-slate-400">画布会自动保存，放心关掉</span>
+      </div>
 
       {/* 主体三栏 */}
       <div className="flex min-h-0 flex-1 gap-2 p-2">
@@ -298,7 +381,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
                 setTaskDone(next);
                 maybeComplete(next);
               }}
-              onAskHint={(text, hints) => buddyRef.current?.askInMode('hint', `我在做任务「${text}」，给我一点提示！`)}
+              onAskHint={(text) => buddyRef.current?.askInMode('hint', `我在做任务「${text}」，给我一点提示！`)}
             />
           ) : (
             <div className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto rounded-2xl bg-white/90 p-4 shadow-md">
@@ -320,19 +403,27 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
           )}
         </div>
 
-        {/* 中：积木编辑器 */}
-        <div className="min-w-0 flex-1">
-          <BlocklyWorkspace
-            toolbox={toolbox}
-            starterXml={lesson.starterXml}
-            onReady={(api) => {
-              wsApiRef.current = api;
-              execRef.current = new Executor(api.workspace, stageRef.current);
-              // 调试/自动化测试钩子：在控制台可注入 XML 并检查积木
-              (window as unknown as { __islandWs?: unknown }).__islandWs = api;
-            }}
-            onChange={() => revalidate(false)}
-          />
+        {/* 中：积木编辑器（挂载后按进度显式载入草稿/初始积木） */}
+        <div className="min-w-0 flex-1" key={lesson.id}>
+          {progressReady ? (
+            <BlocklyWorkspace
+              toolbox={toolbox}
+              initialXml={lesson.starterXml}
+              onReady={(api) => {
+                wsApiRef.current = api;
+                execRef.current = new Executor(api.workspace, stageRef.current);
+                (window as unknown as { __islandWs?: unknown }).__islandWs = api;
+                setWsReady(true);
+              }}
+              onChange={handleWorkspaceChange}
+              onFlush={(xml) => {
+                clearTimeout(draftTimer.current);
+                if (profile) void api.updateProgress(profile.id, { lessonId: lesson.id, draft: xml }).catch(() => {});
+              }}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-2xl bg-white/60 text-slate-400">正在恢复你的画布…</div>
+          )}
         </div>
 
         {/* 右：舞台 */}
@@ -348,7 +439,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
             ) : (
               <button onClick={handleRun} className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-2xl text-white shadow-lg hover:bg-emerald-600" title="运行">▶</button>
             )}
-            <span className="text-sm text-slate-500">{running ? '程序运行中…（点方块可以触发点击事件）' : '点 ▶ 运行你的程序'}</span>
+            <span className="text-sm text-slate-500">{running ? '程序运行中…（点角色可以触发点击事件）' : '点 ▶ 运行你的程序'}</span>
           </div>
         </div>
 
@@ -367,6 +458,22 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
         )}
       </div>
 
+      {/* 魔法代码预览 */}
+      {codeOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setCodeOpen(false)}>
+          <div className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-3xl bg-white p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="mb-1 text-xl font-black">👀 你的积木变成了代码！</h3>
+            <p className="mb-4 text-sm text-slate-500">
+              你拖的每一块积木，在电脑里其实长这样。以后学文字编程（Python）时，就是直接写这些字——但现在你已经能「读」懂它们啦！
+            </p>
+            <pre className="rounded-2xl bg-slate-900 p-4 font-mono text-sm leading-relaxed text-emerald-300">{codeText || '（先拖几块积木，这里就会显示出代码）'}</pre>
+            <div className="mt-4 text-right">
+              <button onClick={() => setCodeOpen(false)} className="rounded-xl bg-slate-200 px-4 py-2 font-bold hover:bg-slate-300">知道了！</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 保存作品弹窗 */}
       {saveOpen && (
         <Modal onClose={() => setSaveOpen(false)} title="💾 把作品挂到作品墙">
@@ -378,7 +485,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
             className="w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:border-violet-400"
           />
           <div className="mt-4 flex justify-end gap-2">
-            <button onClick={() => setSaveOpen(false)} className="kid-btn">取消</button>
+            <button onClick={() => setSaveOpen(false)} className="rounded-xl bg-slate-200 px-4 py-2 font-bold">取消</button>
             <button onClick={() => void doSave()} className="rounded-xl bg-violet-500 px-4 py-2 font-bold text-white hover:bg-violet-600">保存</button>
           </div>
         </Modal>
@@ -405,6 +512,18 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
         </div>
       )}
     </div>
+  );
+}
+
+function ToolBtn({ title, onClick, children }: { title: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className="rounded-lg bg-white/80 px-2.5 py-1 font-semibold text-slate-600 shadow-sm transition hover:bg-white hover:text-sky-700"
+    >
+      {children}
+    </button>
   );
 }
 

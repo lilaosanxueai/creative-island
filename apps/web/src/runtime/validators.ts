@@ -17,6 +17,8 @@ export function checkRule(rule: CheckRule, ev: RunEvidence): boolean {
   switch (rule.type) {
     case 'block_used':
       return (ev.blockCounts[rule.block] ?? 0) >= 1;
+    case 'block_used_any':
+      return rule.blocks.some((b) => (ev.blockCounts[b] ?? 0) >= 1);
     case 'block_count_min':
       return (ev.blockCounts[rule.block] ?? 0) >= rule.count;
     case 'block_count_total_min':
@@ -41,4 +43,12 @@ export function evaluateTasks(
     out[t.id] = t.check.type === 'manual' ? (prev[t.id] ?? false) : checkRule(t.check, ev);
   }
   return out;
+}
+
+/** 通关条件：所有「必做」任务（不含 ⭐挑战）全部完成 */
+export function requiredTasksDone(
+  tasks: { id: string; optional?: boolean }[],
+  states: Record<string, boolean>,
+): boolean {
+  return tasks.filter((t) => !t.optional).every((t) => states[t.id]);
 }

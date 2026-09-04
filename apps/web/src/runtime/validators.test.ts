@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkRule, evaluateTasks, type RunEvidence } from './validators.ts';
+import { checkRule, evaluateTasks, requiredTasksDone, type RunEvidence } from './validators.ts';
 
 const ev = (over: Partial<RunEvidence> = {}): RunEvidence => ({
   blockCounts: {},
@@ -13,6 +13,12 @@ describe('checkRule 各类规则', () => {
   it('block_used：用了才算过', () => {
     expect(checkRule({ type: 'block_used', block: 'island_repeat' }, ev({ blockCounts: { island_repeat: 1 } }))).toBe(true);
     expect(checkRule({ type: 'block_used', block: 'island_repeat' }, ev())).toBe(false);
+  });
+
+  it('block_used_any：任一积木用过即过', () => {
+    const rule: import('@shared/types.ts').CheckRule = { type: 'block_used_any', blocks: ['island_costume', 'island_change_size'] };
+    expect(checkRule(rule, ev({ blockCounts: { island_change_size: 1 } }))).toBe(true);
+    expect(checkRule(rule, ev({ blockCounts: { island_say: 3 } }))).toBe(false);
   });
 
   it('block_count_min：数量要达标', () => {
@@ -57,5 +63,19 @@ describe('evaluateTasks', () => {
   it('manual 原状态为空时保持未完成', () => {
     const out = evaluateTasks(tasks, ev(), {});
     expect(out).toEqual({ a: false, b: false });
+  });
+});
+
+describe('requiredTasksDone 通关条件', () => {
+  const tasks = [
+    { id: 'a', check: { type: 'manual' } as const },
+    { id: 'b', check: { type: 'manual' } as const, optional: true },
+  ];
+
+  it('⭐挑战（optional）不做完也能通关', () => {
+    expect(requiredTasksDone(tasks, { a: true, b: false })).toBe(true);
+  });
+  it('必做任务缺一个都不行', () => {
+    expect(requiredTasksDone(tasks, { a: false, b: true })).toBe(false);
   });
 });

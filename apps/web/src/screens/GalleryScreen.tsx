@@ -31,6 +31,11 @@ export default function GalleryScreen() {
     refresh();
   };
 
+  const like = async (p: Project) => {
+    await api.likeProject(profile!.id, p.id, profile!.id).catch(() => {});
+    refresh();
+  };
+
   if (!profile) return null;
 
   return (
@@ -56,6 +61,17 @@ export default function GalleryScreen() {
                   <div className="text-xs text-slate-400">{new Date(p.updatedAt).toLocaleDateString('zh-CN')}</div>
                   <div className="mt-2 flex gap-1">
                     <button onClick={() => setPlaying(p)} className="flex-1 rounded-xl bg-emerald-500 py-1.5 text-sm font-bold text-white hover:bg-emerald-600">▶ 放映</button>
+                    <button
+                      onClick={() => void like(p)}
+                      title="给作品点个赞"
+                      className={`flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-sm font-bold transition ${
+                        (p.likes ?? []).includes(profile.id)
+                          ? 'bg-rose-100 text-rose-600'
+                          : 'bg-slate-200 text-slate-500 hover:bg-rose-50 hover:text-rose-500'
+                      }`}
+                    >
+                      {(p.likes ?? []).includes(profile.id) ? '❤️' : '🤍'} {(p.likes ?? []).length || ''}
+                    </button>
                     <button onClick={() => void remove(p)} className="rounded-xl bg-slate-200 px-2 py-1.5 text-sm text-slate-500 hover:bg-rose-100 hover:text-rose-600" title="删除">🗑</button>
                   </div>
                 </div>

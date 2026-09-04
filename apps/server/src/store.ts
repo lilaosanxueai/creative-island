@@ -50,7 +50,7 @@ function progressFile(profileId: string): string {
 }
 
 export function getProgress(profileId: string): ProfileProgress {
-  return readJson<ProfileProgress>(progressFile(profileId), { profileId, lessons: {}, dailyUsage: {} });
+  return readJson<ProfileProgress>(progressFile(profileId), { profileId, lessons: {}, dailyUsage: {}, lessonDrafts: {} });
 }
 
 export function mergeProgress(profileId: string, patch: {
@@ -58,6 +58,7 @@ export function mergeProgress(profileId: string, patch: {
   tasks?: Record<string, boolean>;
   completed?: boolean;
   minutesDelta?: number;
+  draft?: string;
 }): ProfileProgress {
   const cur = getProgress(profileId);
   if (patch.lessonId) {
@@ -72,6 +73,9 @@ export function mergeProgress(profileId: string, patch: {
       lp.completedAt = new Date().toISOString();
     }
     cur.lessons[patch.lessonId] = lp;
+    if (typeof patch.draft === 'string' && patch.draft.length <= 300_000) {
+      cur.lessonDrafts[patch.lessonId] = patch.draft;
+    }
   }
   if (patch.minutesDelta && patch.minutesDelta > 0) {
     const today = new Date().toISOString().slice(0, 10);
@@ -111,6 +115,19 @@ export function saveProject(input: { profileId: string; title: string; xml: stri
 
 export function deleteProject(profileId: string, projectId: string): void {
   writeJson(projectsFile(profileId), listProjects(profileId).filter((p) => p.id !== projectId));
+}
+
+/** 家庭点赞：同一角色可切换（加/取消），返回新列表 */
+export function toggleProjectLike(profileId: string, projectId: string, likerId: string): Project | null {
+  const list = listProjects(profileId);
+  const proj = list.find((p) => p.id === projectId);
+  if (!proj) return null;
+  proj.likes = proj.likes ?? [];
+  const i = proj.likes.indexOf(likerId);
+  if (i >= 0) proj.likes.splice(i, 1);
+  else proj.likes.push(likerId);
+  writeJson(projectsFile(profileId), list);
+  return proj;
 }
 
 // ---------- 设置 ----------

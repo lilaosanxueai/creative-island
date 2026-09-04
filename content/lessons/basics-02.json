@@ -5,27 +5,76 @@
   "title": "会跳舞的机器人",
   "emoji": "🕺",
   "story": "岛上今晚有篝火晚会！rusty 想表演一段机械舞，但它只会一动一动地跳舞——除非你用「重复」积木当鼓点，把动作串成一支舞。",
-  "goals": ["理解循环：让计算机替你做重复的事", "用「等待」控制跳舞的节奏"],
-  "toolbox": ["island_when_run", "island_say", "island_say_for", "island_move", "island_turn_right", "island_turn_left", "island_costume", "island_change_size", "island_repeat", "island_wait", "island_play"],
-  "actor": { "costume": "🤖", "x": 0, "y": 0 },
+  "goals": [
+    "理解循环：让计算机替你做重复的事",
+    "用「等待」控制跳舞的节奏"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_costume",
+    "island_change_size",
+    "island_repeat",
+    "island_wait",
+    "island_play"
+  ],
+  "actor": {
+    "costume": "🤖",
+    "x": 0,
+    "y": 0
+  },
   "tasks": [
     {
       "id": "t1",
       "text": "用「重复」积木把一整套舞蹈动作包起来（比如：转一转、等一下、换个造型）",
-      "hintPrompts": ["一支舞 = 同一套动作跳好几遍。什么积木能「把里面的东西做 N 遍」？在橙色控制分类里", "把「右转」「等待」「换造型」这些积木拼进「重复」的嘴里（凹进去的地方）"],
-      "check": { "type": "block_used", "block": "island_repeat" }
+      "hintPrompts": [
+        "一支舞 = 同一套动作跳好几遍。什么积木能「把里面的东西做 N 遍」？在橙色控制分类里",
+        "把「右转」「等待」「换造型」这些积木拼进「重复」的嘴里（凹进去的地方）"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_repeat"
+      }
     },
     {
       "id": "t2",
       "text": "用至少 2 块「等待」让舞蹈慢下来（不然舞跳得太快像抽筋）",
-      "hintPrompts": ["所有动作一瞬间做完就没意思了，什么积木能让程序「停一拍」？", "在动作和动作之间塞「等待 0.3 秒」左右试试"],
-      "check": { "type": "block_count_min", "block": "island_wait", "count": 2 }
+      "hintPrompts": [
+        "所有动作一瞬间做完就没意思了，什么积木能让程序「停一拍」？",
+        "在动作和动作之间塞「等待 0.3 秒」左右试试"
+      ],
+      "check": {
+        "type": "block_count_min",
+        "block": "island_wait",
+        "count": 2
+      }
     },
     {
       "id": "t3",
       "text": "跳舞前让 rusty 喊一句口号，点燃全场！",
-      "hintPrompts": ["还记得上一课的「说」积木吗？在重复的外面、程序的最前面喊", "在「当开始」后面先拼「说 范火晚会开始啦」，再拼重复"],
-      "check": { "type": "say_text" }
+      "hintPrompts": [
+        "还记得上一课的「说」积木吗？在重复的外面、程序的最前面喊",
+        "在「当开始」后面先拼「说 范火晚会开始啦」，再拼重复"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "optional": true,
+      "text": "⭐ 挑战：给舞蹈配上节奏音效",
+      "hintPrompts": [
+        "「播放声音」放进重复里试试，每个动作响一下就是节拍"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_play"
+      }
     }
   ],
   "aiIntro": "篝火晚会时间！🔥 这节课的秘密武器是「重复」——计算机最擅长的就是不知疲倦地重复。让 rusty 跳一支让全场惊呼的舞吧！",
