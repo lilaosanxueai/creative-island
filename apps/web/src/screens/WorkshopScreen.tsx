@@ -14,6 +14,7 @@ import { StageState, setRunSpeed, getRunSpeed, type RunSpeed } from '../runtime/
 import { playSound, isMuted, setMuted } from '../runtime/sounds.ts';
 import { Executor } from '../runtime/executor.ts';
 import { evaluateTasks, requiredTasksDone, type RunEvidence } from '../runtime/validators.ts';
+import { recognizer } from '../ml/recognizer.ts';
 
 export interface WorkshopMode {
   kind: 'lesson' | 'freeplay';
@@ -71,12 +72,15 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
   const [codeText, setCodeText] = useState('');
   const [speed, setSpeed] = useState<RunSpeed>(getRunSpeed());
   const [muted, setMutedState] = useState(isMuted());
+  const [camOn, setCamOn] = useState(false);
 
   const wsApiRef = useRef<WorkspaceApi | null>(null);
   const stageRef = useRef(new StageState());
   const execRef = useRef<Executor | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const buddyRef = useRef<BuddyHandle>(null);
+  const hiddenVideoRef = useRef<HTMLVideoElement>(null);
+  const lastFiredLabel = useRef<string | null>(null);
   const taskDoneRef = useRef(taskDone);
   taskDoneRef.current = taskDone;
   const completedRef = useRef(lessonCompleted);
@@ -323,6 +327,51 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
     if (muted) playSound('ding');
   };
 
+  // ---------- AI 识别：开启摄像头后持续识别，变化时触发「当 AI 认出」帽子 ----------
+  const toggleCam = async () => {
+    if (camOn) {
+      recognizer.stopCamera();
+      setCamOn(false);
+      stageRef.current.recognized = null;
+      return;
+    }
+    if (!recognizer.hasModel()) {
+      setToast('先去地图上的 🧠 AI 实验室，教它认东西再来！');
+      return;
+    }
+    try {
+      if (hiddenVideoRef.current) await recognizer.ensureCamera(hiddenVideoRef.current);
+      setCamOn(true);
+      setToast('📷 AI 眼睛已打开！点 ▶ 运行后，做动作就能触发「当 AI 认出」积木');
+    } catch {
+      setToast('摄像头打不开，让爸爸妈妈检查一下权限设置～');
+    }
+  };
+
+  useEffect(() => {
+    if (!camOn) { lastFiredLabel.current = null; return; }
+    const timer = setInterval(() => {
+      const pred = recognizer.predict();
+      const stage = stageRef.current;
+      if (pred && pred.conf >= 0.6) {
+        const label = String(pred.label);
+        stage.recognized = label;
+        stage.recognizedConfidence = pred.conf;
+        if (running && label !== lastFiredLabel.current) {
+          lastFiredLabel.current = label;
+          void execRef.current?.trigger({ type: 'recognized', label });
+        }
+      } else {
+        stage.recognized = null;
+        if (!pred) lastFiredLabel.current = null;
+      }
+    }, 250);
+    return () => clearInterval(timer);
+  }, [camOn, running]);
+
+  // 离开工作台时关掉摄像头
+  useEffect(() => () => { recognizer.stopCamera(); }, []);
+
   if (!profile) {
     return <Center><button className="rounded-xl bg-sky-500 px-6 py-3 font-bold text-white" onClick={() => nav('/')}>先选一个角色吧 👋</button></Center>;
   }
@@ -364,6 +413,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
         <ToolBtn title="看看你的积木变成了什么代码" onClick={() => { setCodeText(wsApiRef.current?.getCode() ?? ''); setCodeOpen(true); }}>👀 魔法代码</ToolBtn>
         <span className="mx-1 text-slate-300">|</span>
         <ToolBtn title={muted ? '打开音效' : '关掉音效'} onClick={toggleMute}>{muted ? '🔇' : '🔊'}</ToolBtn>
+        <ToolBtn title={camOn ? '关闭 AI 摄像头' : '打开 AI 摄像头（需先在 AI 实验室训练）'} onClick={() => void toggleCam()}>{camOn ? '📷 AI 眼睛开' : '📷 AI 眼睛'}</ToolBtn>
         <ToolBtn title="全屏（更像一台游戏机）" onClick={toggleFullscreen}>⛶ 全屏</ToolBtn>
         <span className="ml-auto pr-1 text-xs text-slate-400">画布会自动保存，放心关掉</span>
       </div>
@@ -497,7 +547,19 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
           <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
             <div className="mb-2 text-6xl">🎉</div>
             <h2 className="mb-2 text-2xl font-black text-emerald-600">通关啦！</h2>
-            <p className="mb-6 whitespace-pre-wrap text-slate-600">{lesson.celebrate}</p>
+            <p className="mb-3 whitespace-pre-wrap text-slate-600">{lesson.celebrate}</p>
+            {lesson.curriculum ? (
+              <div className="mb-6 rounded-2xl bg-emerald-50 p-3 text-left">
+                <div className="mb-1.5 text-sm font-bold text-emerald-700">
+                  📗 本课解锁的课本知识（{lesson.curriculum.stage}·{lesson.curriculum.module}）
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {lesson.curriculum.points.map((p) => (
+                    <span key={p} className="rounded-full bg-white px-3 py-1 text-sm font-semibold text-emerald-700 shadow-sm">✓ {p}</span>
+                  ))}
+                </div>
+              </div>
+            ) : <p className="mb-6" />}
             <div className="flex justify-center gap-3">
               <button onClick={() => setCelebrate(false)} className="rounded-xl bg-slate-200 px-4 py-2 font-bold hover:bg-slate-300">再改进一下</button>
               <button onClick={() => nav('/map')} className="rounded-xl bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">回到地图 🏝</button>
@@ -505,6 +567,9 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
           </div>
         </div>
       )}
+
+      {/* AI 眼睛的隐藏视频源 */}
+      <video ref={hiddenVideoRef} playsInline muted className="hidden" />
 
       {toast && (
         <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-slate-800/90 px-5 py-3 text-white shadow-xl">

@@ -28,6 +28,9 @@ export class StageState {
   bubble: { text: string; until: number } | null = null;
   targets: StageTargetState[] = [];
   keysHeld = new Set<string>();
+  /** AI 训练场识别结果：当前类别索引（'0'/'1'/'2'）与置信度，null=未开启/没认出 */
+  recognized: string | null = null;
+  recognizedConfidence = 0;
 
   /** 运行证据（跨多次运行累积，通关校验用） */
   saidTexts: string[] = [];
@@ -99,6 +102,7 @@ export class StageState {
     wait: async (secs: number) => { await sleep(Math.max(0.1, secs) * 1000); },
     touchingEdge: (): boolean => Math.abs(this.x) >= BOUND_X - 15 || Math.abs(this.y) >= BOUND_Y - 15,
     keyDown: (key: string): boolean => this.keysHeld.has(key),
+    recognize: (cls: string): boolean => this.recognized === cls && this.recognizedConfidence >= 0.6,
     random: (from: number, to: number): number => {
       const lo = Math.min(from, to), hi = Math.max(from, to);
       return Math.floor(Math.random() * (hi - lo + 1)) + lo;

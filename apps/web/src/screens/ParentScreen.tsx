@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { Lesson, Profile, ProfileProgress, Settings } from '@shared/types.ts';
+import type { Lesson, Profile, ProfileProgress, Project, Settings } from '@shared/types.ts';
 import { api } from '../api.ts';
+import { calcStreak } from '../utils/streak.ts';
 
-/** 家长面板：PIN 门 → 学习进度 / AI 对话记录 / 伙伴设置 */
+/** 家长面板：PIN 门 → 学习进度 / 学情报告 / AI 对话记录 / 伙伴设置 */
 
-type Tab = 'progress' | 'chats' | 'settings';
+type Tab = 'progress' | 'report' | 'chats' | 'settings';
 
 export default function ParentScreen() {
   const [pin, setPin] = useState(sessionStorage.getItem('island-pin') ?? '');
@@ -44,9 +45,12 @@ export default function ParentScreen() {
 
   return (
     <div className="mx-auto min-h-screen max-w-4xl px-6 py-8">
-      <div className="mb-6 flex items-center gap-3">
+      <div className="mb-4 flex items-center gap-3">
         <h1 className="text-2xl font-black">🛡 家长中心</h1>
         <Link to="/map" className="ml-auto rounded-xl bg-slate-200 px-3 py-1.5 text-sm font-bold hover:bg-slate-300">← 回应用</Link>
+      </div>
+      <div className="mb-6 rounded-2xl bg-emerald-50 p-3 text-sm leading-relaxed text-emerald-800">
+        🔒 <b>隐私承诺</b>：孩子的全部数据（进度、作品、AI 对话、训练场样本与摄像头画面）都只保存在这台电脑上，不上云、不联网同步；摄像头画面只在本机浏览器内计算。
       </div>
       <Tabs />
     </div>
@@ -68,7 +72,7 @@ function Tabs() {
   return (
     <div>
       <div className="mb-6 flex gap-2">
-        {([['progress', '📈 学习进度'], ['chats', '💬 AI 对话记录'], ['settings', '⚙️ 设置']] as [Tab, string][])
+        {([['progress', '📈 学习进度'], ['report', '📗 学情报告'], ['chats', '💬 AI 对话记录'], ['settings', '⚙️ 设置']] as [Tab, string][])
           .map(([k, label]) => (
             <button
               key={k}
@@ -90,6 +94,7 @@ function Tabs() {
       </div>
       {!profileId ? <p className="text-slate-400">还没有创建孩子角色</p> : (
         tab === 'progress' ? <ProgressTab profileId={profileId} />
+          : tab === 'report' ? <ReportTab profileId={profileId} />
           : tab === 'chats' ? <ChatsTab profileId={profileId} pin={sessionStorage.getItem('island-pin')!} />
           : <SettingsTab pin={sessionStorage.getItem('island-pin')!} />
       )}
@@ -138,8 +143,90 @@ function ProgressTab({ profileId }: { profileId: string }) {
   );
 }
 
-function ChatsTab({ profileId, pin }: { profileId: string; pin: string }) {
-  const [dates, setDates] = useState<string[]>([]);
+/** 学情报告：课标知识点覆盖 + 学习投入统计，可打印 */
+function ReportTab({ profileId }: { profileId: string }) {
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [progress, setProgress] = useState<ProfileProgress | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    void api.lessons().then(setLessons);
+    void api.progress(profileId).then(setProgress);
+    void api.projects(profileId).then(setProjects).catch(() => {});
+  }, [profileId]);
+
+  const done = (id: string) => progress?.lessons[id]?.status === 'completed';
+  const totalMin = Object.values(progress?.dailyUsage ?? {}).reduce((a, b) => a + b, 0);
+  const streak = calcStreak(progress?.dailyUsage ?? {});
+  const doneCount = lessons.filter((l) => done(l.id)).length;
+
+  // 知识点覆盖：已完成课的知识点打勾（按模块分组展示）
+  const byModule = new Map<string, { point: string; lesson: Lesson; done: boolean }[]>();
+  for (const l of lessons) {
+    if (!l.curriculum) continue;
+    for (const p of l.curriculum.points) {
+      const key = `${l.curriculum.stage} · ${l.curriculum.module}`;
+      if (!byModule.has(key)) byModule.set(key, []);
+      byModule.get(key)!.push({ point: p, lesson: l, done: done(l.id) });
+    }
+  }
+
+  return (
+    <div>
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="累计学习" value={`${totalMin} 分钟`} emoji="⏰" />
+        <StatCard label="连续天数" value={`${streak} 天`} emoji="🔥" />
+        <StatCard label="课程通关" value={`${doneCount}/${lessons.length}`} emoji="🏁" />
+        <StatCard label="创作作品" value={`${projects.length} 个`} emoji="🖼" />
+      </div>
+
+      <div className="rounded-2xl bg-white/80 p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="font-black">📗 课标知识点覆盖</h3>
+          <span className="text-xs text-slate-400">对标《义务教育信息科技课程标准（2022年版）》</span>
+        </div>
+        {[...byModule.entries()].map(([mod, points]) => (
+          <div key={mod} className="mb-4">
+            <div className="mb-1.5 text-sm font-bold text-slate-600">{mod}</div>
+            <div className="flex flex-wrap gap-2">
+              {points.map((p) => (
+                <span
+                  key={p.point + p.lesson.id}
+                  title={`${p.lesson.title}${p.done ? ' · 已通关' : ' · 未完成'}`}
+                  className={`rounded-full px-3 py-1 text-sm font-semibold ${
+                    p.done ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-400'
+                  }`}
+                >
+                  {p.done ? '✓' : '○'} {p.point}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+        <p className="mt-2 text-xs leading-relaxed text-slate-400">
+          绿色 ✓ 为已通关课程覆盖的知识点。2025 年秋季起多地中小学开设 AI 通识课（每年级不少于 8 课时），
+          创意岛可作为课内的家庭动手补充：同样的知识点，这里全部通过「自己做出来」来学会。
+        </p>
+      </div>
+
+      <div className="mt-4 text-right print:hidden">
+        <button onClick={() => window.print()} className="rounded-xl bg-slate-800 px-5 py-2 font-bold text-white hover:bg-slate-900">🖨 打印 / 存 PDF</button>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, emoji }: { label: string; value: string; emoji: string }) {
+  return (
+    <div className="rounded-2xl bg-white/80 p-4 text-center shadow-sm">
+      <div className="text-2xl">{emoji}</div>
+      <div className="mt-1 text-xl font-black text-slate-800">{value}</div>
+      <div className="text-xs text-slate-400">{label}</div>
+    </div>
+  );
+}
+
+function ChatsTab({ profileId, pin }: { profileId: string; pin: string }) {  const [dates, setDates] = useState<string[]>([]);
   const [date, setDate] = useState('');
   const [logs, setLogs] = useState<{ ts: string; mode: string; user: string; assistant: string }[]>([]);
 

@@ -33,7 +33,9 @@
     "island_touching_edge",
     "island_key_down",
     "island_number",
-    "island_random"
+    "island_random",
+    "island_when_recognized",
+    "island_recognize"
   ],
   "actor": {
     "costume": "🌟",
@@ -77,5 +79,13 @@
     }
   ],
   "aiIntro": "发布会时间！🎤 我已经准备好帮你头脑风暴了。告诉我：你想做一个什么东西？越具体越好——我们一起把它拆成一块一块的积木！",
-  "celebrate": "🏅 结业啦！从第一块积木到自己的作品，你已经是一名真正的小创作者了。去作品墙放映给爸爸妈妈看，然后……创意岛永远为你的下一个点子敞开！"
+  "celebrate": "🏅 结业啦！从第一块积木到自己的作品，你已经是一名真正的小创作者了。去作品墙放映给爸爸妈妈看，然后……创意岛永远为你的下一个点子敞开！",
+  "curriculum": {
+    "stage": "第三学段（5-6年级）",
+    "module": "过程与控制",
+    "points": [
+      "综合运用三种基本控制结构",
+      "项目创作与表达"
+    ]
+  }
 }

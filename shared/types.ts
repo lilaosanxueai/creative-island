@@ -32,6 +32,16 @@ export interface StageTarget {
   y: number;
 }
 
+/** 课标对标：《义务教育信息科技课程标准（2022年版）》 */
+export interface CurriculumInfo {
+  /** 学段，如"第三学段（5-6年级）" */
+  stage: string;
+  /** 内容模块，如"身边的算法" */
+  module: string;
+  /** 本课覆盖的知识点 */
+  points: string[];
+}
+
 export interface Lesson {
   id: string;
   island: string;
@@ -49,6 +59,8 @@ export interface Lesson {
   tasks: LessonTask[];
   /** 综合创作课：无固定通关校验，任务多为自评 */
   freeplayLesson?: boolean;
+  /** 对标课标信息（家长端学情报告与任务面板展示） */
+  curriculum?: CurriculumInfo;
   aiIntro: string;
   celebrate: string;
 }
@@ -138,3 +150,16 @@ export const DEFAULT_SETTINGS: Settings = {
   },
   limits: { dailyMinutes: 40, hintStrictness: 'normal' },
 };
+
+/** AI 训练场：一个已训练的类别（名字 + 样本特征向量） */
+export interface TrainedClass {
+  name: string;
+  emoji: string;
+  /** 每条样本是压缩灰度特征向量（0~1），仅存在于本机 */
+  samples: number[][];
+}
+
+export interface PlaygroundModel {
+  classes: TrainedClass[];
+  updatedAt?: string;
+}

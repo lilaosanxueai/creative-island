@@ -8,7 +8,11 @@ import { sleep } from './stageState.ts';
  * __guard 在每个循环迭代让出事件循环：孩子的死循环不会卡死页面，⏹ 随时可停。
  */
 
-export type HatTrigger = { type: 'run' } | { type: 'key'; key: string } | { type: 'click' };
+export type HatTrigger =
+  | { type: 'run' }
+  | { type: 'key'; key: string }
+  | { type: 'click' }
+  | { type: 'recognized'; label: string };
 
 const STOP = Symbol('island-stop');
 
@@ -70,6 +74,7 @@ export class Executor {
     return this.ws.getTopBlocks(false).filter((b) => {
       if (trigger.type === 'key') return b.type === 'island_when_key' && b.getFieldValue('KEY') === trigger.key;
       if (trigger.type === 'click') return b.type === 'island_when_clicked';
+      if (trigger.type === 'recognized') return b.type === 'island_when_recognized' && b.getFieldValue('CLASS') === trigger.label;
       return b.type === 'island_when_run';
     });
   }

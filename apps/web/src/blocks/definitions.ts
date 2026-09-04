@@ -12,6 +12,12 @@ export const KEY_OPTIONS: [string, string][] = [
 export const COSTUME_OPTIONS: [string, string][] = [
   ['🤖 机器人', '🤖'], ['🐱 小猫', '🐱'], ['🚀 火箭', '🚀'], ['🦊 小狐狸', '🦊'],
   ['⭐ 星星', '⭐'], ['🎂 蛋糕', '🎂'], ['🏀 篮球', '🏀'],
+  ['🐼 熊猫警长', '🐼'], ['🏮 灯笼', '🏮'], ['🐉 中国龙', '🐉'],
+];
+
+/** AI 训练场类别下拉（训练场里可改名，这里用通用名） */
+export const AI_CLASS_OPTIONS: [string, string][] = [
+  ['🧠 类别 1', '0'], ['🧠 类别 2', '1'], ['🧠 类别 3', '2'],
 ];
 
 export const SOUND_OPTIONS: [string, string][] = [
@@ -21,12 +27,12 @@ export const SOUND_OPTIONS: [string, string][] = [
 const C = { event: '#FFBF00', motion: '#4C97FF', looks: '#9966FF', sound: '#CF63CF', control: '#FFAB19', sensing: '#5CB1D6', ops: '#59C059' };
 
 export const BLOCK_CATEGORIES: Record<string, { name: string; colour: string; blocks: string[] }> = {
-  event:   { name: '⚡ 事件', colour: C.event,   blocks: ['island_when_run', 'island_when_key', 'island_when_clicked'] },
+  event:   { name: '⚡ 事件', colour: C.event,   blocks: ['island_when_run', 'island_when_key', 'island_when_clicked', 'island_when_recognized'] },
   motion:  { name: '🏃 运动', colour: C.motion,  blocks: ['island_move', 'island_turn_right', 'island_turn_left', 'island_goto', 'island_bounce'] },
   looks:   { name: '🎭 外观', colour: C.looks,   blocks: ['island_say', 'island_say_for', 'island_costume', 'island_change_size', 'island_show', 'island_hide'] },
   sound:   { name: '🔊 声音', colour: C.sound,   blocks: ['island_play'] },
   control: { name: '🔁 控制', colour: C.control, blocks: ['island_repeat', 'island_forever', 'island_wait', 'island_if', 'island_if_else'] },
-  sensing: { name: '👀 侦测', colour: C.sensing, blocks: ['island_touching_edge', 'island_key_down'] },
+  sensing: { name: '👀 侦测', colour: C.sensing, blocks: ['island_touching_edge', 'island_key_down', 'island_recognize'] },
   ops:     { name: '🎲 运算', colour: C.ops,     blocks: ['island_number', 'island_random'] },
 };
 
@@ -37,6 +43,7 @@ Blockly.defineBlocksWithJsonArray([
   { type: 'island_when_run', message0: '当 ▶ 开始被点击', nextStatement: null, colour: C.event, tooltip: '点下面的 ▶ 按钮时，从这里开始执行' },
   { type: 'island_when_key', message0: '当按下 %1 键', args0: [{ type: 'field_dropdown', name: 'KEY', options: KEY_OPTIONS }], nextStatement: null, colour: C.event, tooltip: '运行中按下这个键时触发' },
   { type: 'island_when_clicked', message0: '当角色被点击', nextStatement: null, colour: C.event, tooltip: '运行中点击舞台上的角色时触发' },
+  { type: 'island_when_recognized', message0: '当 AI 认出 %1', args0: [{ type: 'field_dropdown', name: 'CLASS', options: AI_CLASS_OPTIONS }], nextStatement: null, colour: C.event, tooltip: '需要先在 AI 训练场教会让它认的东西；摄像头认出时触发' },
 
   // ---------- 运动 ----------
   { type: 'island_move', message0: '移动 %1 步', args0: [{ type: 'input_value', name: 'STEPS', check: 'Number' }], previousStatement: null, nextStatement: null, colour: C.motion, tooltip: '朝当前朝向移动（可以塞进随机数）' },
@@ -66,6 +73,7 @@ Blockly.defineBlocksWithJsonArray([
   // ---------- 侦测 ----------
   { type: 'island_touching_edge', message0: '碰到边缘？', output: 'Boolean', colour: C.sensing, tooltip: '角色是否碰到了舞台边缘' },
   { type: 'island_key_down', message0: '按下 %1 键？', args0: [{ type: 'field_dropdown', name: 'KEY', options: KEY_OPTIONS }], output: 'Boolean', colour: C.sensing, tooltip: '某个键此刻是否被按着' },
+  { type: 'island_recognize', message0: 'AI 认出 %1 ？', args0: [{ type: 'field_dropdown', name: 'CLASS', options: AI_CLASS_OPTIONS }], output: 'Boolean', colour: C.sensing, tooltip: '摄像头此刻认出的是不是这个类别（要在 AI 训练场先教它）' },
 
   // ---------- 运算 ----------
   { type: 'island_number', message0: '%1', args0: [{ type: 'field_number', name: 'NUM', value: 1 }], output: 'Number', colour: C.ops, tooltip: '一个数字，可以塞进别的积木空位里' },
@@ -74,9 +82,9 @@ Blockly.defineBlocksWithJsonArray([
 
 /** 积木类型 → 中文名（给 AI 上下文摘要用） */
 export const BLOCK_LABELS: Record<string, string> = {
-  island_when_run: '当开始被点击', island_when_key: '当按下某键', island_when_clicked: '当角色被点击',
+  island_when_run: '当开始被点击', island_when_key: '当按下某键', island_when_clicked: '当角色被点击', island_when_recognized: '当AI认出',
   island_move: '移动', island_turn_right: '右转', island_turn_left: '左转', island_goto: '移到xy', island_bounce: '边缘反弹',
   island_say: '说', island_say_for: '说几秒', island_costume: '换造型', island_change_size: '改变大小', island_show: '显示', island_hide: '隐藏',
   island_play: '播放声音', island_repeat: '重复几次', island_forever: '一直重复', island_wait: '等待', island_if: '如果', island_if_else: '如果否则',
-  island_touching_edge: '碰到边缘?', island_key_down: '按下某键?', island_number: '数字', island_random: '随机数',
+  island_touching_edge: '碰到边缘?', island_key_down: '按下某键?', island_recognize: 'AI认出?', island_number: '数字', island_random: '随机数',
 };

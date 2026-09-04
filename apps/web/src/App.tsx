@@ -5,6 +5,7 @@ import WorkshopScreen from './screens/WorkshopScreen.tsx';
 import GalleryScreen from './screens/GalleryScreen.tsx';
 import ParentScreen from './screens/ParentScreen.tsx';
 import CertificateScreen from './screens/CertificateScreen.tsx';
+import PlaygroundScreen from './screens/PlaygroundScreen.tsx';
 
 function LessonRoute() {
   const { id } = useParams();
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/gallery" element={<GalleryScreen />} />
         <Route path="/parent" element={<ParentScreen />} />
         <Route path="/certificate" element={<CertificateScreen />} />
+        <Route path="/playground" element={<PlaygroundScreen />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </HashRouter>

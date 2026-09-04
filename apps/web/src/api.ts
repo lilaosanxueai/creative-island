@@ -1,4 +1,4 @@
-import type { BuddyMode, ChatContext, ChatMessage, Lesson, Profile, ProfileProgress, Project, Settings } from '@shared/types.ts';
+import type { BuddyMode, ChatContext, ChatMessage, Lesson, PlaygroundModel, Profile, ProfileProgress, Project, Settings } from '@shared/types.ts';
 
 async function req<T>(url: string, init?: RequestInit): Promise<T> {
   const resp = await fetch(url, {
@@ -33,6 +33,9 @@ export const api = {
   saveSettings: (s: Settings, pin: string) =>
     req<Settings>('/api/settings', { method: 'PUT', body: JSON.stringify(s), headers: { 'x-parent-pin': pin } }),
   verifyPin: (pin: string) => req<{ ok: boolean }>('/api/verify-pin', { method: 'POST', body: JSON.stringify({ pin }) }),
+  playground: (profileId: string) => req<PlaygroundModel>(`/api/playground/${profileId}`),
+  savePlayground: (profileId: string, model: PlaygroundModel) =>
+    req<PlaygroundModel>(`/api/playground/${profileId}`, { method: 'POST', body: JSON.stringify(model) }),
   chatDates: (profileId: string, pin: string) =>
     req<{ dates: string[] }>(`/api/chatlogs?profileId=${profileId}`, { headers: { 'x-parent-pin': pin } }),
   chatLogs: (profileId: string, date: string, pin: string) =>

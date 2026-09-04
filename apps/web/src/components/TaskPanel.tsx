@@ -18,6 +18,11 @@ export default function TaskPanel({ lesson, taskDone, onToggleManual, onAskHint 
       <div>
         <div className="text-2xl">{lesson.emoji}</div>
         <h2 className="text-lg font-bold">{lesson.title}</h2>
+        {lesson.curriculum && (
+          <div className="mt-1 inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700" title="对标的校内课程标准">
+            📗 对标课标：{lesson.curriculum.stage}·{lesson.curriculum.module}
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl bg-amber-50 p-2 text-sm leading-relaxed text-amber-900">

@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import type { BuddyMode, ChatContext, ChatMessage, Settings } from '@shared/types.ts';
+import type { BuddyMode, ChatContext, ChatMessage, PlaygroundModel, Settings } from '@shared/types.ts';
 import type { AppConfig } from './config.ts';
 import { llmConfigured } from './config.ts';
 import * as store from './store.ts';
@@ -8,6 +8,7 @@ import { streamChat, type LlmMessage } from './llm.ts';
 import { buildSystemPrompt } from './prompts.ts';
 import { checkKidInput, stripUrls } from './safety.ts';
 import { appendChatLog, readChatLogs, listChatDates } from './logging.ts';
+import { getPlayground, savePlayground } from './playground.ts';
 
 export function buildRouter(cfg: AppConfig): Router {
   const r = Router();
@@ -164,6 +165,14 @@ export function buildRouter(cfg: AppConfig): Router {
       send('delta', { text: friendly });
       finish(`${full}${friendly}`, 'error');
     }
+  });
+
+  // ---------- AI 训练场模型（仅存本机） ----------
+  r.get('/playground/:profileId', (req, res) => res.json(getPlayground(req.params.profileId)));
+  r.post('/playground/:profileId', (req, res) => {
+    const model = req.body as PlaygroundModel;
+    if (!model || !Array.isArray(model.classes)) return res.status(400).json({ error: '模型格式不对' });
+    res.status(201).json(savePlayground(req.params.profileId, model));
   });
 
   // ---------- 对话记录（家长） ----------

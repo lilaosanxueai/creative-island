@@ -1,0 +1,47 @@
+{
+  "id": "extra-02",
+  "island": "extra",
+  "order": 8,
+  "title": "信息安全小卫士",
+  "emoji": "🛡",
+  "story": "「信息大盗」幻影盯上了创意岛，专偷小冒险家的秘密！熊猫警长 🐼 招募小卫士：先学会什么信息绝不能说，再写一个「放哨程序」守住小岛。",
+  "goals": ["知道哪些个人信息不能随便说", "学会用程序表达安全规则"],
+  "toolbox": ["island_when_run", "island_when_clicked", "island_say", "island_say_for", "island_move", "island_hide", "island_show", "island_play", "island_wait", "island_forever", "island_if", "island_if_else", "island_touching_edge"],
+  "actor": { "costume": "🐼", "x": 0, "y": 0 },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "上岗培训：点右边伙伴的 📖 模式，问它「哪些信息不能告诉别人？」（聊完自己打勾）",
+      "hintPrompts": ["直接问：哪些是个人信息？为什么要保护？"],
+      "check": { "type": "manual" }
+    },
+    {
+      "id": "t2",
+      "text": "让熊猫警长喊出你的安全口号（比如「秘密不上网！」）",
+      "hintPrompts": ["用「说」积木，口号你自己定，够响亮就行"],
+      "check": { "type": "say_text" }
+    },
+    {
+      "id": "t3",
+      "text": "写放哨程序①：「一直重复」地巡逻（里面放一块移动）",
+      "hintPrompts": ["哨兵不睡觉——哪块积木表示永不停止地重复？", "「一直重复」嘴里放「移动 5」，走慢一点像巡逻"],
+      "check": { "type": "block_used", "block": "island_forever" }
+    },
+    {
+      "id": "t4",
+      "text": "写放哨程序②：巡逻里加「如果 碰到边缘？ 那么 播放 💥警报 并 说 站住！」（大盗从边缘来）",
+      "hintPrompts": ["「如果」的六边形空位放「碰到边缘？」，嘴里放「播放声音 砰」和「说 站住！」", "写完点 ▶ 试试：等警长走到边上会不会报警"],
+      "check": { "type": "block_used", "block": "island_if" }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：加「隐藏/显示」让警长巡逻时神出鬼没",
+      "hintPrompts": ["在「如果」的否则分支（用「如果…否则…」）里放「隐藏」，被发现时「显示」"],
+      "check": { "type": "block_used_any", "blocks": ["island_hide", "island_show"] },
+      "optional": true
+    }
+  ],
+  "curriculum": { "stage": "第一、二学段（1-4年级）", "module": "信息隐私与安全", "points": ["个人信息保护", "识别网络风险", "用程序表达规则"] },
+  "aiIntro": "熊猫警长向你敬礼 🐼 salute！今天有双重任务：先当学生——搞清楚哪些秘密要守住；再当工程师——写一个真的放哨程序。信息安全的本领，课本里从一年级就开始教啦！",
+  "celebrate": "小卫士上岗！🎖 你学会了课本里「信息隐私与安全」最重要的一课：名字、住址、学校、密码——这些永远不给网上任何人；还用「如果」把安全规则写成了真程序。规则能写进程序，才是真正的卫士！"
+}

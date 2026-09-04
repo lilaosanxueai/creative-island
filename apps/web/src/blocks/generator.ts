@@ -12,6 +12,7 @@ const str = (v: unknown): string => JSON.stringify(String(v ?? ''));
 javascriptGenerator.forBlock['island_when_run'] = () => '';
 javascriptGenerator.forBlock['island_when_key'] = () => '';
 javascriptGenerator.forBlock['island_when_clicked'] = () => '';
+javascriptGenerator.forBlock['island_when_recognized'] = () => '';
 
 const valOr = (b: Block, name: string, fallback: string): string =>
   javascriptGenerator.valueToCode(b, name, Order.NONE) || fallback;
@@ -55,6 +56,7 @@ javascriptGenerator.forBlock['island_if_else'] = (b) => {
 
 javascriptGenerator.forBlock['island_touching_edge'] = () => ['api.touchingEdge()', Order.ATOMIC];
 javascriptGenerator.forBlock['island_key_down'] = (b) => [`api.keyDown(${str(b.getFieldValue('KEY'))})`, Order.ATOMIC];
+javascriptGenerator.forBlock['island_recognize'] = (b) => [`api.recognize(${str(b.getFieldValue('CLASS'))})`, Order.ATOMIC];
 javascriptGenerator.forBlock['island_number'] = (b) => [String(num(b.getFieldValue('NUM'))), Order.ATOMIC];
 javascriptGenerator.forBlock['island_random'] = (b) =>
   [`api.random(${valOr(b, 'FROM', '1')}, ${valOr(b, 'TO', '10')})`, Order.ATOMIC];

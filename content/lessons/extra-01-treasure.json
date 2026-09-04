@@ -1,0 +1,46 @@
+{
+  "id": "extra-01",
+  "island": "extra",
+  "order": 7,
+  "title": "坐标小侦探",
+  "emoji": "🗺",
+  "story": "考古队在创意岛挖出一张古老藏宝图，上面只有坐标没有路！驾驶探测车，用「移到 x: y:」的坐标指令直达三处宝藏。数学课的「位置与方向」在这里就是超能力。",
+  "goals": ["学会用坐标 (x, y) 精确指挥位置", "把数学的方位知识用在程序里"],
+  "toolbox": ["island_when_run", "island_say", "island_say_for", "island_move", "island_turn_right", "island_turn_left", "island_goto", "island_wait", "island_play", "island_random", "island_number"],
+  "actor": { "costume": "🚙", "x": -160, "y": -100, "dir": 45 },
+  "targets": [
+    { "emoji": "💎", "x": 140, "y": 100 },
+    { "emoji": "🗝", "x": -100, "y": 60 },
+    { "emoji": "🏆", "x": 40, "y": -120 }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "宝藏①💎在右上角：中心是 (0,0)，右上角 x 和 y 都是正数。用「移到」直达它！",
+      "hintPrompts": ["看舞台：宝箱在右边又偏上。中心是(0,0)，越往右 x 越大，越往上 y 越大", "试试「移到 x:140 y:100」，数字可以微调到准确位置"],
+      "check": { "type": "actor_reach", "targetIndex": 0 }
+    },
+    {
+      "id": "t2",
+      "text": "宝藏②🗝在左上方——这次 x 要用负数。到达它！",
+      "hintPrompts": ["左边是负数！x:-100 y:60 左右", "负号在数字框里直接输入 - 就有"],
+      "check": { "type": "actor_reach", "targetIndex": 1 }
+    },
+    {
+      "id": "t3",
+      "text": "终极宝藏🏆在下方——这次 y 是负数。拿到它！",
+      "hintPrompts": ["下方 y 为负，x 是正的", "移到 x:40 y:-120 左右"],
+      "check": { "type": "actor_reach", "targetIndex": 2 }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：每到一个宝藏都说一句话宣布（至少 3 块「说」）",
+      "hintPrompts": ["在每块「移到」后面拼一块「说」，比如「拿到钻石！」"],
+      "check": { "type": "block_count_min", "block": "island_say", "count": 3 },
+      "optional": true
+    }
+  ],
+  "curriculum": { "stage": "第三学段（5-6年级）", "module": "过程与控制", "points": ["用坐标描述位置", "指令的精确执行", "跨学科·数学位置与方向"] },
+  "aiIntro": "藏宝图时间 🗺 这次我们的武器是坐标！记住口诀：右加左减、上加下减，中心是 (0,0)。数学课学的东西马上要变成超能力了！",
+  "celebrate": "三处宝藏全找到了！🚩 你刚刚把数学课的「位置与方向」变成了真正的编程超能力——课本里这叫「用坐标精确描述位置」，很多大游戏都是靠它定位的！"
+}
