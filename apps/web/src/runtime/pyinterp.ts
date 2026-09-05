@@ -47,7 +47,7 @@ const KNOWN = new Set([
   'move', 'turn_right', 'turn_left', 'go_to', 'bounce', 'say', 'say_for', 'costume',
   'change_size', 'show', 'hide', 'play', 'wait',
   'touching_edge', 'key_down', 'recognize', 'random',
-  'range', 'on_key', 'on_click', 'on_recognize', 'print',
+  'range', 'on_key', 'on_click', 'on_recognize', 'print', 'eq',
 ]);
 
 /** 拼写纠错建议 */
@@ -209,7 +209,7 @@ export interface PyStageApi {
   sensor(name: string, args: (number | string | boolean)[]): boolean | number;
 }
 
-const SENSORS = new Set(['touching_edge', 'key_down', 'recognize', 'random']);
+const SENSORS = new Set(['touching_edge', 'key_down', 'recognize', 'random', 'eq']);
 
 export class PyRunner {
   private token = 0;

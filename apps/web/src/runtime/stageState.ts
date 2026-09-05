@@ -103,6 +103,7 @@ export class StageState {
     touchingEdge: (): boolean => Math.abs(this.x) >= BOUND_X - 15 || Math.abs(this.y) >= BOUND_Y - 15,
     keyDown: (key: string): boolean => this.keysHeld.has(key),
     recognize: (cls: string): boolean => this.recognized === cls && this.recognizedConfidence >= 0.6,
+    eq: (a: number, b: number): boolean => Number(a) === Number(b),
     random: (from: number, to: number): number => {
       const lo = Math.min(from, to), hi = Math.max(from, to);
       return Math.floor(Math.random() * (hi - lo + 1)) + lo;

@@ -20,6 +20,16 @@ export default function TaskPanel({ lesson, taskDone, ideaHint, onToggleManual, 
       <div>
         <div className="text-2xl">{lesson.emoji}</div>
         <h2 className="text-lg font-bold">{lesson.title}</h2>
+        {lesson.subject && (
+          <div className="mt-1 inline-block rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-600">
+            {lesson.subject.emoji} 编程 × {lesson.subject.name}
+          </div>
+        )}
+        {lesson.curriculum && (
+          <div className="mt-1 inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700" title="对标的校内课程标准">
+            📗 对标课标：{lesson.curriculum.stage}·{lesson.curriculum.module}
+          </div>
+        )}
         {ideaHint ? (
           <div className="mt-1 rounded-xl bg-violet-50 p-2 text-xs leading-relaxed text-violet-700">
             💡 你今天的点子：{ideaHint}

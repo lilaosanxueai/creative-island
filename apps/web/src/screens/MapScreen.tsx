@@ -34,7 +34,8 @@ export default function MapScreen() {
   const today = new Date().toISOString().slice(0, 10);
   const todayMin = progress?.dailyUsage[today] ?? 0;
   const basics = lessons.filter((l) => l.island === 'basics');
-  const extras = lessons.filter((l) => l.island !== 'basics');
+  const extras = lessons.filter((l) => l.island === 'extra');
+  const cross = lessons.filter((l) => l.island === 'cross');
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -141,6 +142,42 @@ export default function MapScreen() {
                   );
                 })}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* 交叉学院 */}
+        {cross.length > 0 && (
+          <section className="mb-8">
+            <h2 className="mb-4 flex items-center gap-2 text-2xl font-black text-rose-700">
+              <span>🎓</span> 交叉学院
+              <span className="text-sm font-normal text-slate-400">编程 × 语文 · 数学 · 音乐 · 科学——新课标的跨学科主题学习</span>
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {cross.map((l) => {
+                const done = lessonDone(l.id);
+                const rec = nextRec?.id === l.id;
+                return (
+                  <button
+                    key={l.id}
+                    onClick={() => nav(`/lesson/${l.id}`)}
+                    className={`rounded-3xl p-4 text-left shadow-md transition hover:-translate-y-1 hover:shadow-xl ${
+                      done ? 'bg-rose-50 ring-4 ring-rose-300' : 'bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-4xl">{l.emoji}</div>
+                      <div className="min-w-0">
+                        <div className="truncate font-bold">{l.title}</div>
+                        <div className="mt-0.5 text-xs text-rose-500">{l.subject?.emoji} 编程 × {l.subject?.name}</div>
+                      </div>
+                      {done && <span className="ml-auto text-xl">✅</span>}
+                      {rec && !done && <span className="ml-auto text-xl">💡</span>}
+                    </div>
+                    <div className="mt-2 text-xs leading-relaxed text-slate-400">{l.goals[0]}</div>
+                  </button>
+                );
+              })}
             </div>
           </section>
         )}

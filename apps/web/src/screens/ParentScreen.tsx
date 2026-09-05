@@ -171,6 +171,10 @@ function ReportTab({ profileId }: { profileId: string }) {
     }
   }
 
+  // 跨学科覆盖：编程 × 学科（交叉学院）
+  const crossLessons = lessons.filter((l) => l.subject);
+  const crossDone = crossLessons.filter((l) => done(l.id));
+
   return (
     <div>
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -208,6 +212,42 @@ function ReportTab({ profileId }: { profileId: string }) {
           创意岛可作为课内的家庭动手补充：同样的知识点，这里全部通过「自己做出来」来学会。
         </p>
       </div>
+
+      {crossLessons.length > 0 && (
+        <div className="mt-4 rounded-2xl bg-rose-50/80 p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="font-black text-rose-700">🎓 跨学科主题学习（编程 × 学科）</h3>
+            <span className="text-xs text-rose-400">新课标要求：每学期不少于 10% 课时的跨学科主题学习</span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {crossLessons.map((l) => (
+              <div
+                key={l.id}
+                className={`rounded-xl p-3 text-sm ${done(l.id) ? 'bg-white shadow-sm' : 'bg-white/50 opacity-70'}`}
+              >
+                <div className="flex items-center gap-2 font-bold text-slate-700">
+                  <span>{done(l.id) ? '✅' : '○'}</span>
+                  <span className="text-lg">{l.emoji}</span>
+                  <span className="truncate">{l.title}</span>
+                  <span className="ml-auto shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-600">
+                    {l.subject?.emoji} {l.subject?.name}
+                  </span>
+                </div>
+                {done(l.id) && l.subject && (
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {l.subject.points.map((pt) => (
+                      <span key={pt} className="rounded-full bg-rose-100/70 px-2 py-0.5 text-xs text-rose-700">✓ {pt}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-rose-400">
+            已完成 {crossDone.length}/{crossLessons.length} 个跨学科项目——每个项目同时点亮一门学科的知识点和编程本领。
+          </p>
+        </div>
+      )}
 
       <div className="mt-4 text-right print:hidden">
         <button onClick={() => window.print()} className="rounded-xl bg-slate-800 px-5 py-2 font-bold text-white hover:bg-slate-900">🖨 打印 / 存 PDF</button>

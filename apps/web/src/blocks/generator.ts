@@ -58,5 +58,6 @@ javascriptGenerator.forBlock['island_touching_edge'] = () => ['api.touchingEdge(
 javascriptGenerator.forBlock['island_key_down'] = (b) => [`api.keyDown(${str(b.getFieldValue('KEY'))})`, Order.ATOMIC];
 javascriptGenerator.forBlock['island_recognize'] = (b) => [`api.recognize(${str(b.getFieldValue('CLASS'))})`, Order.ATOMIC];
 javascriptGenerator.forBlock['island_number'] = (b) => [String(num(b.getFieldValue('NUM'))), Order.ATOMIC];
+javascriptGenerator.forBlock['island_eq'] = (b) => [`api.eq(${valOr(b, 'A', '0')}, ${valOr(b, 'B', '0')})`, Order.ATOMIC];
 javascriptGenerator.forBlock['island_random'] = (b) =>
   [`api.random(${valOr(b, 'FROM', '1')}, ${valOr(b, 'TO', '10')})`, Order.ATOMIC];

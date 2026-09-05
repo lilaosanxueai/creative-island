@@ -1,0 +1,41 @@
+{
+  "id": "cross-03",
+  "island": "cross",
+  "order": 12,
+  "title": "小星星节奏师",
+  "emoji": "🎵",
+  "story": "「一闪一闪亮晶晶」——你一定哼过《小星星》，但你知道它的开头只有 6 个音吗？do do sol sol la la sol！声音积木刚刚解锁了音阶（do re mi fa sol la xi），今天你用程序把这首莫扎特改编过的世界名曲敲出来。",
+  "goals": ["认识 C 大调音阶", "用「播放声音 + 等待」编出旋律"],
+  "toolbox": ["island_when_run", "island_say", "island_say_for", "island_play", "island_wait", "island_repeat", "island_move", "island_turn_right", "island_turn_left", "island_costume", "island_change_size"],
+  "actor": { "costume": "🎹", "x": 0, "y": 0 },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "敲出前六个音：do do sol sol la la（每两个音之间等 0.5 秒）",
+      "hintPrompts": ["声音积木下拉菜单里现在有 🎵do、🎵sol、🎵la", "六个「播放声音」+ 中间夹「等待 0.5」"],
+      "check": { "type": "block_count_min", "block": "island_play", "count": 6 }
+    },
+    {
+      "id": "t2",
+      "text": "补上第七个音 sol，唱出完整的一句「一闪一闪亮晶晶」",
+      "hintPrompts": ["整句是 do do sol sol la la sol，最后一个 sol 要停长一点（等待 1 秒）"],
+      "check": { "type": "block_count_min", "block": "island_play", "count": 7 }
+    },
+    {
+      "id": "t3",
+      "text": "给音乐配画面：钢琴随节奏摇摆（转向/变大小）",
+      "hintPrompts": ["每个音配一个「右转 15」「左转 15」或者「大小改变 ±10」，钢琴就跳起舞来"],
+      "check": { "type": "block_used_any", "blocks": ["island_turn_right", "island_change_size"] }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：用「重复」把这句旋律弹两遍，第二遍换成换造型演奏",
+      "hintPrompts": ["把七块声音包进「重复 2 次」，第二遍加「变成 🎺」"],
+      "check": { "type": "block_used", "block": "island_repeat", "optional": true }
+    }
+  ],
+  "curriculum": { "stage": "第三学段（5-6年级）", "module": "身边的算法", "points": ["顺序结构", "节奏即序列"] },
+  "subject": { "name": "音乐·音阶与旋律", "emoji": "🎶", "points": ["C 大调音阶 do~xi", "旋律由音高序列组成", "节奏与拍感"] },
+  "aiIntro": "欢迎来到创意岛音乐厅 🎶 告诉你个秘密：每首歌都是一串「音的代码」——《小星星》开头就是 do do sol sol la la sol。今天你来当作曲家兼程序员！",
+  "celebrate": "你用代码演奏了一首世界名曲！🎵 音乐课的音阶、数学的序列、编程的顺序结构——在这一刻它们是同一件事。存进作品墙，给全家开一场演奏会！"
+}

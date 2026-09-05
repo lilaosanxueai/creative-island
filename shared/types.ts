@@ -65,6 +65,8 @@ export interface Lesson {
   freeplayLesson?: boolean;
   /** 对标课标信息（家长端学情报告与任务面板展示） */
   curriculum?: CurriculumInfo;
+  /** 交叉课程学科标注：编程 × 学科（跨学科主题学习） */
+  subject?: { name: string; emoji: string; points: string[] };
   aiIntro: string;
   celebrate: string;
 }

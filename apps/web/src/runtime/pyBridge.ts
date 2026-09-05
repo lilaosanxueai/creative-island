@@ -31,6 +31,7 @@ export function pyStageApi(stage: StageState): PyStageApi {
         case 'key_down': return stage.api.keyDown(String(args[0]));
         case 'recognize': return stage.api.recognize(String(args[0]));
         case 'random': return stage.api.random(Number(args[0]), Number(args[1]));
+        case 'eq': return Number(args[0]) === Number(args[1]);
         default: return false;
       }
     },

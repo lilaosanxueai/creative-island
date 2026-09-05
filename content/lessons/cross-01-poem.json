@@ -1,0 +1,49 @@
+{
+  "id": "cross-01",
+  "island": "cross",
+  "order": 10,
+  "title": "静夜思·动画剧场",
+  "emoji": "🌕",
+  "story": "「床前明月光，疑是地上霜。」一千三百年前李白的诗，今天由你做成动画！让诗人的机器人替身念诗、抬头、望月——古诗里藏着动作、节奏和画面，全都可以用程序演出来。",
+  "goals": ["用程序表现古诗的画面与节奏", "学会用「等待」控制朗诵的韵律"],
+  "toolbox": ["island_when_run", "island_say", "island_say_for", "island_wait", "island_turn_right", "island_turn_left", "island_costume", "island_change_size", "island_play", "island_repeat"],
+  "actor": { "costume": "🧑‍🎨", "x": -60, "y": 0 },
+  "targets": [{ "emoji": "🌕", "x": 140, "y": 90 }],
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "让诗人念出第一句「床前明月光」（用「说几秒」，念完自动收）",
+      "hintPrompts": ["「说 停 2 秒」那块积木念完会自己收起来，更像朗诵"],
+      "check": { "type": "say_text" }
+    },
+    {
+      "id": "t2",
+      "text": "四句诗全部念出来，句与句之间用「等待」留出朗诵的节奏（至少 3 块等待）",
+      "hintPrompts": ["静夜思一共四句：床前明月光/疑是地上霜/举头望明月/低头思故乡", "每句后面等 1.5 秒左右，像诗人边想边念"],
+      "check": { "type": "block_count_min", "block": "island_wait", "count": 3 }
+    },
+    {
+      "id": "t3",
+      "text": "念到「举头望明月」时，让诗人抬头（左转/右转 30 度左右）走向月亮 🌕",
+      "hintPrompts": ["「举头」就是抬头——转向月亮的方向再移动", "月亮在右上角，试试右转 45 度再移动"],
+      "check": { "type": "actor_reach", "targetIndex": 0 }
+    },
+    {
+      "id": "t4",
+      "text": "念到「低头思故乡」时，让诗人变个造型（比如变成 🐼 想家）再补一个音效",
+      "hintPrompts": ["「变成 🐼」+「播放声音」，情绪就出来了"],
+      "check": { "type": "block_used_any", "blocks": ["island_costume", "island_change_size"] }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：整首诗放进「重复 2 次」里念两遍，第二遍更快",
+      "hintPrompts": ["把所有诗句包进重复里；第二遍把等待改短"],
+      "check": { "type": "block_used", "block": "island_repeat" },
+      "optional": true
+    }
+  ],
+  "curriculum": { "stage": "第三学段（5-6年级）", "module": "身边的算法", "points": ["顺序结构", "用程序表达节奏"] },
+  "subject": { "name": "语文·古诗", "emoji": "📖", "points": ["《静夜思》李白", "诗句节奏与画面感", "诗意动作化表达"] },
+  "aiIntro": "今晚我们不当程序员，当导演 🎬 把《静夜思》拍成动画！诗人念诗、抬头、望月——诗里的每个动作，都是你的一块积木。",
+  "celebrate": "你把一首流传千年的古诗变成了会动的作品！这就是「数字化的诗意」——语文课的诗情 + 编程的精确，你都用了。给爸妈放映一遍吧！🌕"
+}

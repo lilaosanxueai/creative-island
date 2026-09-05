@@ -22,6 +22,8 @@ export const AI_CLASS_OPTIONS: [string, string][] = [
 
 export const SOUND_OPTIONS: [string, string][] = [
   ['🔔 叮咚', 'ding'], ['🎉 欢呼', 'cheer'], ['🐱 喵', 'meow'], ['💥 砰', 'pop'],
+  ['🎵 do', 'do'], ['🎵 re', 're'], ['🎵 mi', 'mi'], ['🎵 fa', 'fa'],
+  ['🎵 sol', 'sol'], ['🎵 la', 'la'], ['🎵 xi', 'xi'], ['🎶 do（高）', 'do2'],
 ];
 
 const C = { event: '#FFBF00', motion: '#4C97FF', looks: '#9966FF', sound: '#CF63CF', control: '#FFAB19', sensing: '#5CB1D6', ops: '#59C059' };
@@ -33,7 +35,7 @@ export const BLOCK_CATEGORIES: Record<string, { name: string; colour: string; bl
   sound:   { name: '🔊 声音', colour: C.sound,   blocks: ['island_play'] },
   control: { name: '🔁 控制', colour: C.control, blocks: ['island_repeat', 'island_forever', 'island_wait', 'island_if', 'island_if_else'] },
   sensing: { name: '👀 侦测', colour: C.sensing, blocks: ['island_touching_edge', 'island_key_down', 'island_recognize'] },
-  ops:     { name: '🎲 运算', colour: C.ops,     blocks: ['island_number', 'island_random'] },
+  ops:     { name: '🎲 运算', colour: C.ops,     blocks: ['island_number', 'island_random', 'island_eq'] },
 };
 
 export const ALL_BLOCK_TYPES = Object.values(BLOCK_CATEGORIES).flatMap((c) => c.blocks);
@@ -77,6 +79,7 @@ Blockly.defineBlocksWithJsonArray([
 
   // ---------- 运算 ----------
   { type: 'island_number', message0: '%1', args0: [{ type: 'field_number', name: 'NUM', value: 1 }], output: 'Number', colour: C.ops, tooltip: '一个数字，可以塞进别的积木空位里' },
+  { type: 'island_eq', message0: '%1 等于 %2 ?', args0: [{ type: 'input_value', name: 'A', check: 'Number' }, { type: 'input_value', name: 'B', check: 'Number' }], output: 'Boolean', colour: C.ops, tooltip: '两个数相等吗？' },
   { type: 'island_random', message0: '在 %1 和 %2 之间取随机数', args0: [{ type: 'input_value', name: 'FROM', check: 'Number' }, { type: 'input_value', name: 'TO', check: 'Number' }], output: 'Number', colour: C.ops, tooltip: '每次都抽一个不一样的数' },
 ]);
 

@@ -61,6 +61,7 @@ pythonGenerator.forBlock['island_touching_edge'] = () => ['touching_edge()', Ord
 pythonGenerator.forBlock['island_key_down'] = (b) => [`key_down(${str(b.getFieldValue('KEY'))})`, Order.ATOMIC];
 pythonGenerator.forBlock['island_recognize'] = (b) => [`recognize(${str(b.getFieldValue('CLASS'))})`, Order.ATOMIC];
 pythonGenerator.forBlock['island_number'] = (b) => [num(b.getFieldValue('NUM')), Order.ATOMIC];
+pythonGenerator.forBlock['island_eq'] = (b) => [`eq(${val(b, 'A', '0')}, ${val(b, 'B', '0')})`, Order.ATOMIC];
 pythonGenerator.forBlock['island_random'] = (b) => [`random(${val(b, 'FROM', '1')}, ${val(b, 'TO', '10')})`, Order.ATOMIC];
 
 /** 工作区 → Python 代码（过滤空行） */

@@ -1,0 +1,42 @@
+{
+  "id": "cross-04",
+  "island": "cross",
+  "order": 13,
+  "title": "太阳系运转",
+  "emoji": "🪐",
+  "story": "地球绕太阳转一圈要 365 天，在你的剧场里只要 36 块积木！圆周运动的秘诀上一课你已学到：每次前进一点点、转一点点。今天让 🌍 在 🌟 旁边画出轨道——科学课的宇宙，用程序转起来。",
+  "goals": ["理解圆周运动 = 前进 + 持续转向", "用重复画出圆形轨道"],
+  "toolbox": ["island_when_run", "island_say", "island_say_for", "island_move", "island_turn_right", "island_turn_left", "island_wait", "island_repeat", "island_forever", "island_number", "island_costume", "island_change_size", "island_play"],
+  "actor": { "costume": "🌍", "x": -120, "y": 0, "dir": 0 },
+  "targets": [{ "emoji": "🌟", "x": 0, "y": 0 }],
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "画出圆形轨道：在 🌟 旁边「重复 36 次 { 移动 20，右转 10，等待 0.05 }」",
+      "hintPrompts": ["上节课的秘密：36 × 10° = 360°，正好一圈", "每步等 0.05 秒，能看清地球一路的位置"],
+      "check": { "type": "block_used", "block": "island_repeat" }
+    },
+    {
+      "id": "t2",
+      "text": "让地球「回到」太阳身边（碰到 🌟 就算到达，画圆时擦边即可——注意半径别太大）",
+      "hintPrompts": ["36 步 × 每步 20 = 周长 720，半径约 115；中心在 (0,0)，起点 (-120,0) 沿轨道正好经过星星附近", "如果绕得太远，把每步移动改成 15"],
+      "check": { "type": "actor_reach", "targetIndex": 0 }
+    },
+    {
+      "id": "t3",
+      "text": "宣布公转完成：地球说「我绕太阳一圈＝一年！」",
+      "hintPrompts": ["转完一圈加一块「说」"],
+      "check": { "type": "say_text" }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：改成「一直重复」让地球永不停歇地公转，再加上自转（每步顺便变大小）",
+      "hintPrompts": ["「一直重复」替换「重复36次」；「大小改变 10」和「大小改变 -10」交替就是自转的呼吸感"],
+      "check": { "type": "block_used", "block": "island_forever", "optional": true }
+    }
+  ],
+  "curriculum": { "stage": "第三学段（5-6年级）", "module": "过程与控制", "points": ["循环与周期现象", "过程模拟"] },
+  "subject": { "name": "科学·宇宙与地球", "emoji": "🔭", "points": ["地球公转与四季", "圆周运动的分解", "用模型模拟自然现象"] },
+  "aiIntro": "三、二、一，发射 🚀 今天的剧场就是太阳系！你要让地球真的绕着太阳转起来。科学家的模拟器和你写的程序，原理一模一样。",
+  "celebrate": "轨道画圆了！你刚刚完成了一次「科学模拟」——现实里 365 天的公转，你的程序 36 步就复现了。NASA 的科学家用的也是这个思路，只是他们的积木更多一点 😄"
+}

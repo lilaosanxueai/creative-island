@@ -37,6 +37,15 @@ export function playSound(name: string): void {
       case 'cheer': [523, 659, 784, 1046].forEach((f, i) => tone(f, i * 0.09, 0.25, 'triangle')); break;
       case 'meow': tone(600, 0, 0.15, 'sawtooth', 0.08); tone(500, 0.12, 0.25, 'sawtooth', 0.08); break;
       case 'pop': tone(200, 0, 0.08, 'square', 0.1); tone(90, 0.02, 0.15, 'sine', 0.2); break;
+      // C 大调音阶（交叉学院·音乐课用）
+      case 'do': tone(261.63, 0, 0.35, 'triangle'); break;
+      case 're': tone(293.66, 0, 0.35, 'triangle'); break;
+      case 'mi': tone(329.63, 0, 0.35, 'triangle'); break;
+      case 'fa': tone(349.23, 0, 0.35, 'triangle'); break;
+      case 'sol': tone(392.0, 0, 0.35, 'triangle'); break;
+      case 'la': tone(440.0, 0, 0.35, 'triangle'); break;
+      case 'xi': tone(493.88, 0, 0.35, 'triangle'); break;
+      case 'do2': tone(523.25, 0, 0.45, 'triangle'); break;
       default: tone(660, 0, 0.2);
     }
   } catch { /* 音频不可用（如无用户手势）时静默 */ }

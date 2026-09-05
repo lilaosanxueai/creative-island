@@ -1,0 +1,46 @@
+{
+  "id": "cross-02",
+  "island": "cross",
+  "order": 11,
+  "title": "万花筒与正多边形",
+  "emoji": "🔷",
+  "story": "数学老师说：正多边形有一个千年秘密——不管多少条边，外角和永远是 360°！今天你用程序亲手验证它：让机器人沿正三角形、正方形、正六边形走一遍，转的角度对，图形就闭合。",
+  "goals": ["用「移动+转向」走出正多边形", "理解外角 = 360° ÷ 边数"],
+  "toolbox": ["island_when_run", "island_say", "island_say_for", "island_move", "island_turn_right", "island_turn_left", "island_wait", "island_repeat", "island_number", "island_costume", "island_play"],
+  "actor": { "costume": "🚙", "x": -40, "y": -40, "dir": 0 },
+  "targets": [
+    { "emoji": "1️⃣", "x": 120, "y": -40 },
+    { "emoji": "2️⃣", "x": 120, "y": 120 },
+    { "emoji": "3️⃣", "x": -40, "y": 120 }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "走出正方形：从起点出发，四次「移动 160 + 右转 90」，依次经过 1️⃣2️⃣3️⃣ 三个角点",
+      "hintPrompts": ["正方形 4 条边、每个转角 90°；移动的距离就是边长", "「重复 4 次 { 移动 160，右转 90 }」一步到位——这就是数学公式的程序写法！"],
+      "check": { "type": "actor_reach", "targetIndex": 2 }
+    },
+    {
+      "id": "t2",
+      "text": "验证外角秘密：改成「重复 6 次 { 移动 110，右转 60 }」走出正六边形（360 ÷ 6 = 60）",
+      "hintPrompts": ["边数变了，转角就变：360 ÷ 边数；六边形转 60 度", "先回到起点再开始走六边形"],
+      "check": { "type": "block_count_min", "block": "island_turn_right", "count": 1 }
+    },
+    {
+      "id": "t3",
+      "text": "发布你的发现：让机器人说「外角和永远是360度！」",
+      "hintPrompts": ["用「说」把结论喊出来，数学家的仪式感"],
+      "check": { "type": "say_text" }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：用「重复 36 次 { 移动 20，右转 10 }」走出一个圆（36 × 10 = 360）",
+      "hintPrompts": ["每次转一点点，转够 360° 就是一个圆——这也是下一课太阳系的原理"],
+      "check": { "type": "manual", "optional": true }
+    }
+  ],
+  "curriculum": { "stage": "第三学段（5-6年级）", "module": "身边的算法", "points": ["循环结构", "用公式参数化程序"] },
+  "subject": { "name": "数学·图形与几何", "emoji": "📐", "points": ["正多边形的特征", "外角和 = 360°", "用角度描述旋转"] },
+  "aiIntro": "数学实验时间 📐 今天你要用程序证明一个定理！走到每个角点、量出每个转角——数学书上的「外角和 360°」将经过你的手变成真的。",
+  "celebrate": "定理验证成功！数学家用纸笔推了一千年的结论，你让机器人走了一遍就看见了。这就是「用编程做数学实验」——中学的几何课你会比别人多一副眼镜 👓"
+}

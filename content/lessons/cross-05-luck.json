@@ -1,0 +1,115 @@
+{
+  "id": "cross-05",
+  "island": "cross",
+  "order": 14,
+  "title": "幸运大转盘",
+  "emoji": "🎡",
+  "story": "游乐园的大转盘为什么有时中有时不中？因为它肚子里装着「随机数」！今天你亲手造一个：转到 6 就是大奖，其他号码再接再厉。造完你就懂了数学课说的「可能性」到底是什么。",
+  "goals": [
+    "理解随机现象与可能性",
+    "用「如果」对随机结果做判断"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_play",
+    "island_wait",
+    "island_if",
+    "island_if_else",
+    "island_forever",
+    "island_repeat",
+    "island_number",
+    "island_random",
+    "island_move",
+    "island_turn_right",
+    "island_costume",
+    "island_change_size",
+    "island_eq"
+  ],
+  "actor": {
+    "costume": "🎡",
+    "x": 0,
+    "y": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "让转盘转起来：重复「随机数(5,20)」次 { 右转 60，等待 0.1 }——每次转的圈数都不一样！",
+      "hintPrompts": [
+        "把「随机数 5~20」塞进「重复」的次数空位里",
+        "右转 60 度连续 6 次正好一圈，有转盘的感觉"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_random"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "开出号码：再取一个「随机数 1~6」，用「等于 ?」积木看看它是不是 6",
+      "hintPrompts": [
+        "新积木「等于」在绿色运算分类：左边塞「随机数 1~6」，右边塞数字 6",
+        "这个绿色的问号块可以放进「如果」的六边形空位"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_eq"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "中奖逻辑：「如果 (随机数1~6) 等于 6 那么 → 说「六六大顺，中大奖！」+ 播放欢呼 🎉」",
+      "hintPrompts": [
+        "「如果」的嘴里放「说」和「播放声音 欢呼」",
+        "多跑几次！开出 6 的机会只有六分之一——这就是数学课说的可能性"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_if"
+      }
+    },
+    {
+      "id": "t4",
+      "text": "没中奖也要说话：换成「如果…否则…」，否则里说「再接再厉！」",
+      "hintPrompts": [
+        "「如果 否则」版积木有两个嘴：一个中大奖，一个再接再厉"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：整台转盘放进「一直重复」变成街机模式，数数平均几次出一个 6",
+      "hintPrompts": [
+        "一直重复里记得放「等待 1 秒」，不然转盘会疯掉 😄",
+        "跑满 12 次，看看出了几次 6？接近两次就正常（1/6 × 12 = 2）"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_forever",
+        "optional": true
+      }
+    }
+  ],
+  "curriculum": {
+    "stage": "第二学段（3-4年级）",
+    "module": "数据与编码",
+    "points": [
+      "随机现象",
+      "用条件分支处理数据"
+    ]
+  },
+  "subject": {
+    "name": "数学·统计与概率",
+    "emoji": "🎲",
+    "points": [
+      "可能性与随机",
+      "简单事件的发生概率",
+      "1/6 的直觉"
+    ]
+  },
+  "aiIntro": "欢迎来到创意岛游乐场 🎡 这节课我们要揭开游乐园的老底：为什么大奖那么难中？答案藏在「随机数」和 1/6 里。造完这台转盘，你就是懂概率的聪明玩家！",
+  "celebrate": "转盘完工！🎲 你已经摸到了「概率」的门把手：开出 6 的机会只有六分之一——这就是为什么大奖那么难中。带着这个眼光去看世界：抽奖、盲盒、抽卡，都是同一台转盘。聪明人不上当！"
+}
