@@ -1,0 +1,94 @@
+{
+  "id": "math-14",
+  "island": "math",
+  "order": 22,
+  "title": "掷骰子统计师",
+  "emoji": "🎲",
+  "story": "掷 20 次骰子，6 会出现几次？没人知道——这就是随机！但掷得越多，规律越浮出水面。当一回数据收集员：程序掷骰、你记录、全班比较——统计学的第一步。",
+  "goals": [
+    "体验随机现象",
+    "学会收集和记录数据"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_random",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🎲",
+    "x": 0,
+    "y": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "自动掷骰 20 次：重复 20 次 { 播放声音 砰（掷骰）， 等待 0.3 }",
+      "hintPrompts": [
+        "每声「砰」就是掷一次骰子"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_repeat"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "数据收集：看着屏幕数一数……不行，程序掷得太快？那把等待改成 1 秒慢慢掷，用纸笔记下每次的点数",
+      "hintPrompts": [
+        "统计员的第一原则：如实记录"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "播报结果：说「我记录了 20 个数据！」（下节课我们用 Python 数 600 次，看规律的威力）",
+      "hintPrompts": [
+        "数据在手，规律不愁"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：再掷 20 次，两次的结果一样吗？为什么？",
+      "hintPrompts": [
+        "随机！每次都不确定——但大数据里有规律"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第二学段（3-4年级）",
+    "module": "过程与控制",
+    "points": [
+      "重复与模拟"
+    ]
+  },
+  "subject": {
+    "name": "数学·统计与概率",
+    "emoji": "🎲",
+    "points": [
+      "随机现象",
+      "数据的收集与记录"
+    ]
+  },
+  "aiIntro": "🎲 统计师上岗！掷骰子看似全凭运气，但数学家从里面挖出了大规律。今天先学会第一招：收集数据。下一课我们直接用程序掷 600 次！",
+  "celebrate": "数据收集完成！你已经迈出统计学第一步。记住这种感觉：单次 unpredictable，多次有规律——高考概率大题的灵魂就这一句 🎲"
+}

@@ -1,0 +1,102 @@
+{
+  "id": "math-13",
+  "island": "math",
+  "order": 21,
+  "title": "图形的周长侦探",
+  "emoji": "🔄",
+  "story": "沿着图形走一圈，走过的总步数就是周长！让小乌龟绕正方形散步一周回到起点，边走边算：4 条边 × 每边 80 步——周长不用背公式，走一遍就出来了。",
+  "goals": [
+    "理解周长的意义",
+    "会算正方形和长方形的周长"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_random",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🐢",
+    "x": -80,
+    "y": -80,
+    "dir": 90
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "绕正方形一圈：重复 4 次 { 移动 160， 右转 90 }，回到起点的小屋 🏠",
+      "hintPrompts": [
+        "每条边 160 步，走完 4 条边正好一圈回到原点"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t2",
+      "text": "报出周长：说「周长 = 4 × 160 = 640 步！」（周长=边长×4 的由来）",
+      "hintPrompts": [
+        "4 条边一样长，所以乘 4"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "换长方形：重复 2 次 { 移动 200， 右转 90， 移动 120， 右转 90 }——周长 = (200+120) × 2 = 640？走走算算",
+      "hintPrompts": [
+        "长方形对边相等：(长+宽)×2"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：三角形的周长：三条边不一样长，怎么走怎么算？",
+      "hintPrompts": [
+        "三条边分别移动不同距离，加起来"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第二、三学段（3-6年级）",
+    "module": "身边的算法",
+    "points": [
+      "循环与乘法连接"
+    ]
+  },
+  "subject": {
+    "name": "数学·图形与几何",
+    "emoji": "📐",
+    "points": [
+      "周长的认识",
+      "正方形与长方形周长公式"
+    ]
+  },
+  "aiIntro": "🐢 周长侦探事务所开张！今天的案子：一个图形的边界到底有多长？你的侦查手段：亲自走一圈，数步数。数学家的尺子，就是你的脚步。",
+  "celebrate": "周长案告破！你不是背了「边长×4」——你是走出来的。以后任何奇怪图形的周长你都有办法：绕着走一圈就是了 🔄",
+  "targets": [
+    {
+      "emoji": "🏠",
+      "x": -80,
+      "y": -80
+    }
+  ]
+}

@@ -220,7 +220,7 @@ function ReportTab({ profileId }: { profileId: string }) {
           {mathLessons.length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2 rounded-xl bg-sky-100/80 p-3">
               <span className="text-sm font-black text-sky-800">📐 数学岛</span>
-              <span className="text-sm text-sky-700">小学馆 {mathLessons.filter((l) => l.order <= 20 && done(l.id)).length}/{mathLessons.filter((l) => l.order <= 20).length} · 初中馆 {mathLessons.filter((l) => l.order > 20 && l.order <= 24 && done(l.id)).length}/{mathLessons.filter((l) => l.order > 20 && l.order <= 24).length} · 高中馆 {mathLessons.filter((l) => l.order > 24 && done(l.id)).length}/{mathLessons.filter((l) => l.order > 24).length}</span>
+              <span className="text-sm text-sky-700">小学馆 {mathLessons.filter((l) => l.order <= 22 && done(l.id)).length}/{mathLessons.filter((l) => l.order <= 22).length} · 初中馆 {mathLessons.filter((l) => l.order > 22 && l.order <= 30 && done(l.id)).length}/{mathLessons.filter((l) => l.order > 22 && l.order <= 30).length} · 高中馆 {mathLessons.filter((l) => l.order > 30 && done(l.id)).length}/{mathLessons.filter((l) => l.order > 30).length}</span>
               <span className="ml-auto text-xs text-sky-500">覆盖数与代数 · 图形与几何 · 统计与概率 · 函数 · 三角函数（2022 版课标 + 高中衔接）</span>
             </div>
           )}

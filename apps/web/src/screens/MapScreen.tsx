@@ -126,7 +126,7 @@ export default function MapScreen() {
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {mathLessons.map((l) => {
                 const done = lessonDone(l.id);
-                const hall = l.order <= 20 ? '小学馆' : l.order <= 24 ? '初中馆' : '高中馆';
+                const hall = l.order <= 22 ? '小学馆' : l.order <= 30 ? '初中馆' : '高中馆';
                 return (
                   <button
                     key={l.id}
