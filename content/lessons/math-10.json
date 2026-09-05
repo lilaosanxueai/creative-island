@@ -1,0 +1,88 @@
+{
+  "id": "math-10",
+  "island": "math",
+  "order": 24,
+  "title": "抛物线之美",
+  "emoji": "🌊",
+  "story": "y = x²，九年级的二次函数——篮球的弧线、喷泉的水柱、卫星天线的形状全是它。现在你让机器人沿着抛物线滑行，看看系数变小时曲线怎么变胖。",
+  "goals": [
+    "认识二次函数 y=x² 的图像",
+    "探究开口方向与宽窄"
+  ],
+  "toolbox": [],
+  "actor": {
+    "costume": "🏀",
+    "x": 0,
+    "y": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "运行 y=x²：机器人沿抛物线滑行，经过靶点（x=4 时数学值 y=16，缩放后到达）",
+      "hintPrompts": [
+        "代码里 y 用了 x*x*6 的缩放，纯数学是 y=x²"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t2",
+      "text": "把系数变小（x*x*3）：抛物线变胖了还是变瘦了？",
+      "hintPrompts": [
+        "系数越小越胖（开口越大）"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "加负号（-x*x*6）：开口翻转朝下——像喷泉！",
+      "hintPrompts": [
+        "y=-x²，开口朝下"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：y=x²*6+30（向上平移），想想它控制什么？",
+      "hintPrompts": [
+        "上下平移——相当于 y=ax²+c 里的 c"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第四学段（7-9年级）",
+    "module": "身边的算法",
+    "points": [
+      "表达式参数化"
+    ]
+  },
+  "subject": {
+    "name": "数学·函数（初中）",
+    "emoji": "🌊",
+    "points": [
+      "二次函数图像",
+      "系数与开口"
+    ]
+  },
+  "aiIntro": "🏀 投篮时你已经在用抛物线了——只是没人告诉你。今天让机器人替你把 y=x² 走一遍，从此看见任何弧线都能说出它的名字。",
+  "celebrate": "抛物线拿下！初中三大函数（一次、二次、反比例）你已经画了两个。以后看喷泉、投篮、过山车，你看到的都是 y=ax²——这是数学眼，戴上就摘不下来。",
+  "targets": [
+    {
+      "emoji": "🎯",
+      "x": 120,
+      "y": 144
+    }
+  ],
+  "codeLesson": true,
+  "starterCode": "# 二次函数 y = x² 画图机（y 方向 ×6 缩放）\nfor x in range(-5, 6):\n    go_to(x * 30, x * x * 6)\n    wait(0.1)\n\nsay(\"抛物线 y = x² 画好了！\")\n"
+}

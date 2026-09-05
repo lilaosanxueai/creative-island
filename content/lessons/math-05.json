@@ -1,0 +1,113 @@
+{
+  "id": "math-05",
+  "island": "math",
+  "order": 19,
+  "title": "极坐标寻宝",
+  "emoji": "🧭",
+  "story": "藏宝图上不写坐标，写的是「东北方向 45°，120 步」——这就是数学课的「方向与距离」！用「右转角度 + 移动距离」两块积木，让探险家按藏宝图走到三个宝藏点。",
+  "goals": [
+    "会用（方向，距离）描述位置",
+    "练习角度的度量"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🧭",
+    "x": 0,
+    "y": 0,
+    "dir": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "宝藏①💎在东北 45°方向、120 步处：右转 45 度，移动 120（每寻一宝先「移到 0,0」回原点更清爽）",
+      "hintPrompts": [
+        "角色一开始朝上。右转 45° 朝东北，走 120 步"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t2",
+      "text": "宝藏②🗝在正西（左转 90°）、120 步处",
+      "hintPrompts": [
+        "左转 90 度再移动 120"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 1
+      }
+    },
+    {
+      "id": "t3",
+      "text": "终极宝藏🏆在正南（180°）、130 步处",
+      "hintPrompts": [
+        "右转 180 或左转 180 都行——转到正下方"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 2
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：把三段寻宝路连成一趟不回起点的旅行",
+      "hintPrompts": [
+        "不回原点，到每个宝藏后原地转向下一个"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第二、三学段（3-6年级）",
+    "module": "过程与控制",
+    "points": [
+      "角度参数控制"
+    ]
+  },
+  "subject": {
+    "name": "数学·图形与几何",
+    "emoji": "📐",
+    "points": [
+      "用方向和距离确定位置",
+      "角度的认识"
+    ]
+  },
+  "aiIntro": "探险家集合 🧭 数学课学过「北偏东 30°、距离 500 米」吧？那是雷达、导航、飞机都在用的语言。今天你的藏宝图就写着角度和距离——转对、走对，宝藏到手！",
+  "celebrate": "三个宝藏全部到手！你现在真的会用「方向+距离」定位了——GPS 给你指路时说的就是这套话。给爸妈讲讲：不用坐标，只用角度和步数也能找到任何地方！",
+  "targets": [
+    {
+      "emoji": "💎",
+      "x": 85,
+      "y": 85
+    },
+    {
+      "emoji": "🗝",
+      "x": -120,
+      "y": 0
+    },
+    {
+      "emoji": "🏆",
+      "x": 0,
+      "y": -130
+    }
+  ]
+}

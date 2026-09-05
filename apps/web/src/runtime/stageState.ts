@@ -114,5 +114,14 @@ export class StageState {
 function clamp(v: number, lo: number, hi: number): number { return Math.min(hi, Math.max(lo, v)); }
 function norm(deg: number): number { return ((deg % 360) + 360) % 360; }
 export function sleep(ms: number): Promise<void> { return new Promise((r) => setTimeout(r, ms)); }
+
+/** 不受浏览器后台节流的事件循环让渡（MessageChannel），保证 ⏹ 停止即时生效 */
+export function yieldNow(): Promise<void> {
+  return new Promise((resolve) => {
+    const ch = new MessageChannel();
+    ch.port1.onmessage = () => { ch.port1.close(); resolve(); };
+    ch.port2.postMessage(0);
+  });
+}
 /** 受运行速度档位影响的停顿 */
 function scaled(ms: number): Promise<void> { return sleep(ms * SPEED_FACTOR[runSpeed]); }

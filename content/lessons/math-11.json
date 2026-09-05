@@ -1,0 +1,88 @@
+{
+  "id": "math-11",
+  "island": "math",
+  "order": 25,
+  "title": "正弦波发生器",
+  "emoji": "〰️",
+  "story": "sin 和 cos，高中三角函数双主角！它们最神奇的秘密：转一圈的圆，投影出来就是波——手机信号、声音、潮汐全是正弦波。让机器人沿 sin(t) 走一遍，把「波」画出来。",
+  "goals": [
+    "理解正弦函数的图像",
+    "体会周期性与振幅"
+  ],
+  "toolbox": [],
+  "actor": {
+    "costume": "📡",
+    "x": -160,
+    "y": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "运行代码：机器人沿正弦波滑行，冲上波峰靶点（t=90° 时 sin=1，y=120）",
+      "hintPrompts": [
+        "每 30° 走一步，y=sin(t)×120 就是波的高度"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t2",
+      "text": "改振幅：sin(t)*120 改成 sin(t)*60——波变矮了（振幅减半）",
+      "hintPrompts": [
+        "前面的 120 控制波峰多高"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "验证周期：从波峰到下一个波峰，正好 12 步 = 360°——周期性！",
+      "hintPrompts": [
+        "30° × 12 = 360°，一个周期"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：画 cos 波（cos(t)*120），它和 sin 是双胞胎",
+      "hintPrompts": [
+        "cos 就是提前 90° 的 sin"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "高中·函数（衔接课）",
+    "module": "身边的算法",
+    "points": [
+      "数学函数 sin/cos"
+    ]
+  },
+  "subject": {
+    "name": "数学·三角函数（高中）",
+    "emoji": "〰️",
+    "points": [
+      "正弦函数图像",
+      "振幅与周期"
+    ]
+  },
+  "aiIntro": "📡 高中馆开门！sin 和 cos 不是两个按钮，是圆周运动在直线上的影子。你手机里每一条无线信号都是正弦波——今天你亲手画一条。",
+  "celebrate": "你画出了正弦波——宇宙的通用语言！声音、光、Wi-Fi、地震波，物理学家全用 sin 描述。三角函数在你手里不再是查表，是画笔。",
+  "targets": [
+    {
+      "emoji": "🎯",
+      "x": -70,
+      "y": 120
+    }
+  ],
+  "codeLesson": true,
+  "starterCode": "# 正弦波发生器：y = sin(t) × 120\nfor i in range(12):\n    t = i * 30          # 每 30 度走一步\n    go_to(t - 160, sin(t) * 120)\n    wait(0.1)\n\nsay(\"一个周期 = 12 步 = 360 度\")\n"
+}

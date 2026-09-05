@@ -29,13 +29,16 @@ export default function MapScreen() {
 
   const lessonDone = (id: string) => progress?.lessons[id]?.status === 'completed';
   const nextRec = lessons.find((l) => !lessonDone(l.id)); // 建议下一站，不再上锁
-  const allDone = lessons.length > 0 && lessons.every((l) => lessonDone(l.id));
   const streak = calcStreak(progress?.dailyUsage ?? {});
   const today = new Date().toISOString().slice(0, 10);
   const todayMin = progress?.dailyUsage[today] ?? 0;
   const basics = lessons.filter((l) => l.island === 'basics');
   const extras = lessons.filter((l) => l.island === 'extra');
   const cross = lessons.filter((l) => l.island === 'cross');
+  const mathLessons = lessons.filter((l) => l.island === 'math');
+  // 结业证书只看核心路线（基础+拓展）——交叉学院/数学岛是自由探索，不计入
+  const coreLessons = lessons.filter((l) => l.island === 'basics' || l.island === 'extra');
+  const coreDone = coreLessons.length > 0 && coreLessons.every((l) => lessonDone(l.id));
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -146,6 +149,46 @@ export default function MapScreen() {
           </section>
         )}
 
+        {/* 数学岛 */}
+        {mathLessons.length > 0 && (
+          <section className="mb-8">
+            <h2 className="mb-1 flex items-center gap-2 text-2xl font-black text-sky-700">
+              <span>📐</span> 数学岛
+              <span className="text-sm font-normal text-slate-400">数学答案就是通关位置——算对了，角色才停得在那</span>
+            </h2>
+            <div className="mb-3 flex flex-wrap gap-2 text-xs">
+              <span className="rounded-full bg-sky-100 px-3 py-1 font-bold text-sky-700">🏛 小学馆 · 数与代数 / 图形与几何</span>
+              <span className="rounded-full bg-indigo-100 px-3 py-1 font-bold text-indigo-700">🏛 初中馆 · 代数式 / 函数 / 勾股（Python）</span>
+              <span className="rounded-full bg-violet-100 px-3 py-1 font-bold text-violet-700">🏛 高中馆 · 三角函数 / 指数（Python）</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {mathLessons.map((l) => {
+                const done = lessonDone(l.id);
+                const hall = l.order <= 20 ? '小学馆' : l.order <= 24 ? '初中馆' : '高中馆';
+                return (
+                  <button
+                    key={l.id}
+                    onClick={() => nav(`/lesson/${l.id}`)}
+                    className={`rounded-3xl p-4 text-left shadow-md transition hover:-translate-y-1 hover:shadow-xl ${
+                      done ? 'bg-sky-50 ring-4 ring-sky-300' : 'bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="text-4xl">{l.emoji}</div>
+                      <div className="min-w-0">
+                        <div className="truncate font-bold">{l.title}</div>
+                        <div className="mt-0.5 text-xs text-sky-600">{hall} · {l.subject?.name?.replace('数学·', '')}</div>
+                      </div>
+                      {done && <span className="ml-auto text-xl">✅</span>}
+                      {l.codeLesson && <span className={`${done ? '' : 'ml-auto'} shrink-0 rounded-full bg-slate-800 px-2 py-0.5 text-xs font-bold text-white`} title="Python 代码课">🐍</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         {/* 交叉学院 */}
         {cross.length > 0 && (
           <section className="mb-8">
@@ -206,15 +249,15 @@ export default function MapScreen() {
             <div className="mt-0.5 text-xs opacity-90">训练你自己的 AI，认手势、认表情</div>
           </button>
           <button
-            disabled={!allDone}
+            disabled={!coreDone}
             onClick={() => nav('/certificate')}
             className={`rounded-3xl p-5 text-center shadow-lg transition ${
-              allDone ? 'bg-gradient-to-br from-amber-300 to-yellow-500 text-amber-950 hover:-translate-y-1 hover:shadow-2xl' : 'cursor-not-allowed bg-slate-200/70 text-slate-400'
+              coreDone ? 'bg-gradient-to-br from-amber-300 to-yellow-500 text-amber-950 hover:-translate-y-1 hover:shadow-2xl' : 'cursor-not-allowed bg-slate-200/70 text-slate-400'
             }`}
           >
-            <div className="text-4xl">{allDone ? '🏆' : '🔒'}</div>
+            <div className="text-4xl">{coreDone ? '🏆' : '🔒'}</div>
             <div className="mt-1.5 text-base font-black">结业证书</div>
-            <div className="mt-0.5 text-xs">{allDone ? '来领取属于你的证书 →' : `完成全部 ${lessons.length} 课解锁`}</div>
+            <div className="mt-0.5 text-xs">{coreDone ? '来领取属于你的证书 →' : `走完发现之路（基础+拓展共 ${coreLessons.length} 站）解锁`}</div>
           </button>
         </section>
       </main>

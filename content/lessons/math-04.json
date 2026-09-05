@@ -1,0 +1,101 @@
+{
+  "id": "math-04",
+  "island": "math",
+  "order": 18,
+  "title": "行程实验室",
+  "emoji": "🚗",
+  "story": "速度 × 时间 = 路程——五年级应用题之王！现在你是实验室主任：小车每秒跳 12 格，跳 10 秒会停在哪？先预测、写下来，再运行验证。预测对了才算真懂！",
+  "goals": [
+    "掌握速度×时间=路程",
+    "学会先预测再验证的科学方法"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🚗",
+    "x": 0,
+    "y": 0,
+    "dir": 90
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "写下你的预测：先别运行！用「说」说出「我预测停在 120」或你算的数",
+      "hintPrompts": [
+        "12 × 10 = 120？先说出去再验证"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "验证：「重复 10 次 { 移动 12， 等待 0.3 }」——看小车停在你预测的地方吗",
+      "hintPrompts": [
+        "如果预测错了也没关系，看看差在哪，这才是实验"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t3",
+      "text": "改实验参数：速度改成 15（移动 15），先心算新答案再改，看还准不准",
+      "hintPrompts": [
+        "15 × 10 = 150，小车会更远"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：反向工程——已知停在 160，速度 20，该重复几次？",
+      "hintPrompts": [
+        "160 ÷ 20 = 8 次"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第三学段（5-6年级）",
+    "module": "过程与控制",
+    "points": [
+      "参数实验与验证"
+    ]
+  },
+  "subject": {
+    "name": "数学·数与代数",
+    "emoji": "🔢",
+    "points": [
+      "速度时间路程关系",
+      "乘法应用"
+    ]
+  },
+  "aiIntro": "欢迎来到数学岛实验室 🚗 世界上所有的科学实验都是这个套路：预测 → 实验 → 对照。今天你用编程做应用题，比刷 100 道题记得牢！",
+  "celebrate": "实验完成！你不是背了公式，你是做了实验、看着它成真的。预测-验证这个习惯比公式本身珍贵一万倍——所有科学家靠它吃饭。你已经上路了 🔬",
+  "targets": [
+    {
+      "emoji": "🎯",
+      "x": 120,
+      "y": 0
+    }
+  ]
+}

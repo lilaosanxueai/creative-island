@@ -1,0 +1,102 @@
+{
+  "id": "math-02",
+  "island": "math",
+  "order": 16,
+  "title": "跳格子乘法师",
+  "emoji": "✖️",
+  "story": "乘法是什么？5×6 就是「跳 5 次，每次跳 6 格」！机器人站在数轴 -180 处，前面有 5 个格子每格 60——不用一块一块加，用「重复」一步到位，这就是乘法的程序写法。",
+  "goals": [
+    "理解乘法是重复的加法",
+    "用循环表达乘法"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🐸",
+    "x": -180,
+    "y": 0,
+    "dir": 90
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "笨办法先走一遍：连放 5 块「移动 60」，看青蛙跳到 120 的靶心",
+      "hintPrompts": [
+        "-180+60+60+60+60+60，加 5 次就是 120"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t2",
+      "text": "聪明办法：把 5 块移动换成「重复 5 次 { 移动 60 }」——重复就是乘法！",
+      "hintPrompts": [
+        "「重复 5 次」里放一块「移动 60」就行"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_repeat"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "宣布答案：说「5 × 60 = 300 格！」（5 次加法 = 一次乘法）",
+      "hintPrompts": [
+        "300 就是走的总距离"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：改成 6 × 40（重复 6 次移动 40），算算靶心该在哪",
+      "hintPrompts": [
+        "总距离 240，起点 -180 终点就是 60，走到 60 附近试试"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第二学段（3-4年级）",
+    "module": "身边的算法",
+    "points": [
+      "循环结构=重复运算"
+    ]
+  },
+  "subject": {
+    "name": "数学·数与代数",
+    "emoji": "🔢",
+    "points": [
+      "乘法的意义",
+      "乘法与加法的联系"
+    ]
+  },
+  "aiIntro": "数学岛第二站 🐸 今天要揭乘法的老底：它就是「跳格子」！加法是一只只数，乘法是打包数。计算机最擅长重复——所以它算乘法飞快！",
+  "celebrate": "乘法的秘密被你亲手拆开了：5×60 不是魔法，是 5 次跳格子打包成一个「重复」！以后背九九口诀卡住时，就想青蛙跳格子——乘法从来都是可以「走」出来的。",
+  "targets": [
+    {
+      "emoji": "🎯",
+      "x": 120,
+      "y": 0
+    }
+  ]
+}

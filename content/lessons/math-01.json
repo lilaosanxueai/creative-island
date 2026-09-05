@@ -1,0 +1,105 @@
+{
+  "id": "math-01",
+  "island": "math",
+  "order": 15,
+  "title": "数轴加减冒险",
+  "emoji": "➕",
+  "story": "舞台的横线就是一条数轴：右是正、左是负、中间是 0。今天机器人从 -120 出发，你用「移动」当加减号：往左是减、往右是加——算对了，它正好停在答案的位置！",
+  "goals": [
+    "在数轴上理解加减法",
+    "认识负数：0 的左边"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🐰",
+    "x": -120,
+    "y": 0,
+    "dir": 90
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "热身：从 -120 出发，往右移动 80，看看停在哪个数（观察舞台位置）",
+      "hintPrompts": [
+        "移动 80 后报数：-120+80=-40"
+      ],
+      "check": {
+        "type": "manual"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "真正的挑战：「先移动 -30（往左），再移动 +80（往右）」，停在 -70 的靶心 🎯",
+      "hintPrompts": [
+        "往左是负数移动！移动 -30 就是往左 30",
+        "-120-30+80，一步一步算：先到 -150，再到 -70"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t3",
+      "text": "报出算式：让兔子说「-120-30+80=-70！」",
+      "hintPrompts": [
+        "用「说」把算式喊出来"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：自己出一道题考同学——换个起点和靶心位置",
+      "hintPrompts": [
+        "用「移到」摆新起点，再走过去"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_goto"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第二、三学段（3-6年级）",
+    "module": "身边的算法",
+    "points": [
+      "顺序结构",
+      "参数可以是负数"
+    ]
+  },
+  "subject": {
+    "name": "数学·数与代数",
+    "emoji": "🔢",
+    "points": [
+      "负数的认识",
+      "数轴模型",
+      "加减法的意义"
+    ]
+  },
+  "aiIntro": "欢迎来到数学岛的第一站 🐰 舞台中间那条看不见的横线就是数轴！记住口诀：右加左减、中间是 0。让兔子跳到靶心，你的算式就对了！",
+  "celebrate": "你已经用身体学会了数轴加减法！数学家笛卡尔看着蜘蛛网发明了数轴和坐标——你今天用兔子的脚步走了同一条路。负数不再是抽象符号，是兔子往左跳的那一步！",
+  "targets": [
+    {
+      "emoji": "🎯",
+      "x": -70,
+      "y": 0
+    }
+  ]
+}

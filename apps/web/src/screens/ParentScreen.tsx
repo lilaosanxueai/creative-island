@@ -171,9 +171,11 @@ function ReportTab({ profileId }: { profileId: string }) {
     }
   }
 
-  // 跨学科覆盖：编程 × 学科（交叉学院）
+  // 跨学科覆盖：编程 × 学科（交叉学院 + 数学岛）
   const crossLessons = lessons.filter((l) => l.subject);
   const crossDone = crossLessons.filter((l) => done(l.id));
+  const mathLessons = lessons.filter((l) => l.island === 'math');
+  const mathDone = mathLessons.filter((l) => done(l.id));
 
   return (
     <div>
@@ -215,6 +217,13 @@ function ReportTab({ profileId }: { profileId: string }) {
 
       {crossLessons.length > 0 && (
         <div className="mt-4 rounded-2xl bg-rose-50/80 p-5">
+          {mathLessons.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2 rounded-xl bg-sky-100/80 p-3">
+              <span className="text-sm font-black text-sky-800">📐 数学岛</span>
+              <span className="text-sm text-sky-700">小学馆 {mathLessons.filter((l) => l.order <= 20 && done(l.id)).length}/{mathLessons.filter((l) => l.order <= 20).length} · 初中馆 {mathLessons.filter((l) => l.order > 20 && l.order <= 24 && done(l.id)).length}/{mathLessons.filter((l) => l.order > 20 && l.order <= 24).length} · 高中馆 {mathLessons.filter((l) => l.order > 24 && done(l.id)).length}/{mathLessons.filter((l) => l.order > 24).length}</span>
+              <span className="ml-auto text-xs text-sky-500">覆盖数与代数 · 图形与几何 · 统计与概率 · 函数 · 三角函数（2022 版课标 + 高中衔接）</span>
+            </div>
+          )}
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-black text-rose-700">🎓 跨学科主题学习（编程 × 学科）</h3>
             <span className="text-xs text-rose-400">新课标要求：每学期不少于 10% 课时的跨学科主题学习</span>

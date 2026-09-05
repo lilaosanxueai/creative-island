@@ -1,7 +1,7 @@
 import * as Blockly from 'blockly';
 import { javascriptGenerator } from 'blockly/javascript';
 import type { StageState } from './stageState.ts';
-import { sleep } from './stageState.ts';
+import { sleep, yieldNow } from './stageState.ts';
 
 /**
  * 把工作区里的帽子积木编译成 async JS 并在受控环境执行。
@@ -38,7 +38,7 @@ export class Executor {
     this._running = true;
     const guard = async () => {
       if (myToken !== this.token) throw STOP;
-      await sleep(0); // 让出事件循环，⏹ 才能生效
+      await yieldNow(); // MessageChannel 让渡不受后台节流，⏹ 始终即时
     };
     const code = this.hatBlocks(trigger)
       .map((hat) => {

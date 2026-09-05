@@ -1,0 +1,97 @@
+{
+  "id": "math-06",
+  "island": "math",
+  "order": 20,
+  "title": "割圆术·祖冲之的圆",
+  "emoji": "⭕",
+  "story": "一千五百年前，祖冲之用「割圆术」把圆周率算到小数点后 7 位，世界纪录保持了 900 年！他的方法：用正多边形逼近圆——边数越多，越像圆。今天你用程序重演这个中国数学传奇。",
+  "goals": [
+    "体会「正多边形逼近圆」的极限思想",
+    "认识祖冲之与割圆术"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🖋",
+    "x": -110,
+    "y": 0,
+    "dir": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "先走正十二边形：重复 12 次 { 移动 60， 右转 30 }（360÷12=30）",
+      "hintPrompts": [
+        "转角 = 360 ÷ 边数，十二边形转 30 度"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_repeat"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "升级到正三十六边形：重复 36 次 { 移动 20， 右转 10 }——像圆了吗？",
+      "hintPrompts": [
+        "边数翻三倍，转角缩小三倍"
+      ],
+      "check": {
+        "type": "block_count_min",
+        "block": "island_turn_right",
+        "count": 1
+      }
+    },
+    {
+      "id": "t3",
+      "text": "说出传承：让毛笔说「祖冲之，圆周率 3.1415926~3.1415927！」",
+      "hintPrompts": [
+        "这才是中国数学的名场面"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：正七十二边形（重复 72 次{移动 10，右转 5}），肉眼已分不出是圆",
+      "hintPrompts": [
+        "36 边已经很像了，72 边就是「割之弥细，所失弥少」"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第三学段（5-6年级）",
+    "module": "身边的算法",
+    "points": [
+      "循环与参数规律"
+    ]
+  },
+  "subject": {
+    "name": "数学·图形与几何+数学文化",
+    "emoji": "📐",
+    "points": [
+      "圆的特征",
+      "正多边形与圆",
+      "祖冲之与割圆术"
+    ]
+  },
+  "aiIntro": "今天上课前先鞠一躬 🙇 给祖冲之——他用算筹（小棍子）算出了 π≈3.1415926，领先世界近千年。你用积木几分钟就能重演他的思路。这就是传承：工具变了，思想没变！",
+  "celebrate": "你重演了割圆术！「边数越多越接近圆」——这个思想在高中叫「极限」，在大学微积分里是基石。祖冲之用一辈子逼近的东西，你今天亲眼看到了。中国数学的接力棒，现在在你手里 🏮"
+}

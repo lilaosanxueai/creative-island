@@ -647,6 +647,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
                   wsApiRef.current = api;
                   execRef.current = new Executor(api.workspace, stageRef.current);
                   (window as unknown as { __islandWs?: unknown }).__islandWs = api;
+                  (window as unknown as { __islandStage?: unknown }).__islandStage = stageRef.current;
                   setWsReady(true);
                 }}
                 onChange={handleWorkspaceChange}

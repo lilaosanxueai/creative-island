@@ -23,14 +23,18 @@ export default function CertificateScreen() {
   if (!profile) return null;
 
   const done = lessons.filter((l) => progress?.lessons[l.id]?.status === 'completed');
-  const allDone = lessons.length > 0 && done.length === lessons.length;
-  const completedAt = progress?.lessons[lessons[lessons.length - 1]?.id]?.completedAt;
+  // 结业证书只看核心路线（基础+拓展）；交叉学院/数学岛是自由探索
+  const core = lessons.filter((l) => l.island === 'basics' || l.island === 'extra');
+  const coreDoneIds = new Set(done.filter((l) => core.some((c) => c.id === l.id)).map((l) => l.id));
+  const allDone = core.length > 0 && core.every((l) => coreDoneIds.has(l.id));
+  const completedAt = progress?.lessons[core[core.length - 1]?.id]?.completedAt;
 
   if (!allDone) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4">
         <div className="text-6xl">🔒</div>
-        <p className="text-lg text-slate-500">完成全部 {lessons.length} 课后，这里会变出一张属于你的结业证书！</p>
+        <p className="text-lg text-slate-500">走完发现之路（基础 + 拓展共 {core.length} 站）后，这里会变出一张属于你的结业证书！</p>
+        <p className="text-sm text-slate-400">🎓 交叉学院和 📐 数学岛随时自由探索，不计入结业</p>
         <Link to="/map" className="rounded-xl bg-sky-500 px-5 py-2 font-bold text-white">回地图继续冒险 →</Link>
       </div>
     );
@@ -46,15 +50,15 @@ export default function CertificateScreen() {
         <p className="mt-8 text-lg text-slate-700">兹证明</p>
         <p className="my-2 text-4xl font-black text-slate-900">{profile.avatar} {profile.name}</p>
         <p className="mx-auto max-w-md leading-relaxed text-slate-700">
-          独立完成了创意岛全部 <b>{lessons.length}</b> 节编程课，掌握了
+          独立完成了创意岛发现之路全部 <b>{core.length}</b> 站，掌握了
           <b>顺序、循环、事件、条件、调试</b>五大编程法宝，
           并创作出了完全属于自己的作品。特发此证，以资鼓励！
         </p>
 
         <div className="mx-auto mt-8 grid max-w-lg grid-cols-2 gap-x-6 gap-y-1 text-left text-sm text-slate-600">
-          {done.map((l) => (
+          {core.map((l) => (
             <div key={l.id} className="flex items-center gap-2">
-              <span>✅</span><span className="truncate">{l.emoji} {l.title}</span>
+              <span>{coreDoneIds.has(l.id) ? '✅' : '○'}</span><span className="truncate">{l.emoji} {l.title}</span>
             </div>
           ))}
         </div>

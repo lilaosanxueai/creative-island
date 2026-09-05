@@ -1,0 +1,107 @@
+{
+  "id": "math-03",
+  "island": "math",
+  "order": 17,
+  "title": "对折魔法·一半的秘密",
+  "emoji": "🍕",
+  "story": "从数轴 0 到 200 有一段路，兔子只走「一半」——那「一半」到底是多少？这节课把分数变得看得见：整体分两份，每份就是二分之一。蛋糕对折你会，路程对折你也马上会！",
+  "goals": [
+    "初步认识分数 1/2",
+    "理解「一半」= 总数 ÷ 2"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_number",
+    "island_costume",
+    "island_change_size"
+  ],
+  "actor": {
+    "costume": "🐰",
+    "x": 0,
+    "y": 0,
+    "dir": 90
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "第一次对折：从 0 走到整段路的一半，停在中间的 🚩（先心算一半是多少再走）",
+      "hintPrompts": [
+        "200 的一半：200÷2=100，「移到 x:100」"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t2",
+      "text": "走完另一半到终点 🏁，验证两个一半拼起来=整体",
+      "hintPrompts": [
+        "再走 100 就到 200"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 1
+      }
+    },
+    {
+      "id": "t3",
+      "text": "说出咒语：「100 是 200 的二分之一，写作 1/2！」",
+      "hintPrompts": [
+        "「说」出这句话，分数就属于你了"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：四分之一呢？把路分成 4 段走，每段是多少？",
+      "hintPrompts": [
+        "200÷4=50，分四次走每次 50"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第二、三学段（3-6年级）",
+    "module": "身边的算法",
+    "points": [
+      "用数量参数化动作"
+    ]
+  },
+  "subject": {
+    "name": "数学·数与代数",
+    "emoji": "🔢",
+    "points": [
+      "分数的初步认识",
+      "几分之一"
+    ]
+  },
+  "aiIntro": "魔法课开始 🪄 分数是很多小朋友的第一个坎——因为它看不见。今天我们让它看得见：一条路对折，一半就是 1/2。数学岛的兔子已经准备好了！",
+  "celebrate": "你看懂分数了！教材上写「把整体平均分成若干份，其中的一份就是几分之一」——你没背这句话，你走了一遍。这就是数学岛的学法：先做出来，再听懂。",
+  "targets": [
+    {
+      "emoji": "🚩",
+      "x": 100,
+      "y": 0
+    },
+    {
+      "emoji": "🏁",
+      "x": 200,
+      "y": 0
+    }
+  ]
+}
