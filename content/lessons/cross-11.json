@@ -1,0 +1,101 @@
+{
+  "id": "cross-11",
+  "island": "cross",
+  "order": 32,
+  "title": "分子运动会",
+  "emoji": "🫧",
+  "story": "一滴水里有亿亿亿个分子，它们一刻不停地在乱撞——温度越高撞得越疯。这就是分子动理论！用「随机数」让分子乱跳：温度低跳得慢，温度高跳得快，肉眼看见「热」的本质。",
+  "goals": [
+    "知道分子在不停运动",
+    "理解温度与分子运动速度的关系"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_forever",
+    "island_if",
+    "island_if_else",
+    "island_number",
+    "island_random",
+    "island_costume",
+    "island_change_size",
+    "island_eq",
+    "island_touching_edge"
+  ],
+  "actor": {
+    "costume": "🫧",
+    "x": 0,
+    "y": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "冰水里的分子（0°C）：一直重复 { 移到(随机 -60~60, 随机 -60~60)， 等待 1 }——慢慢悠悠",
+      "hintPrompts": [
+        "「移到」的 x y 空位塞「随机数 -60~60」"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_random"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "温水（40°C）：等待改成 0.4——跳得快多了",
+      "hintPrompts": [
+        "温度高，分子跑得快"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_forever"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "开水（100°C）：等待改成 0.1——疯狂乱撞！说「温度越高分子运动越快！」",
+      "hintPrompts": [
+        "这就是热茶为什么更香：分子飞得远"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：冻结态（-50°C）：分子几乎不动（等待 3，随机范围 ±20）——固体里分子只能原地抖",
+      "hintPrompts": [
+        "固体分子不乱跑，只在小范围振动"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第三学段（5-6年级）",
+    "module": "过程与控制",
+    "points": [
+      "随机模拟"
+    ]
+  },
+  "subject": {
+    "name": "化学·分子动理论（初中衔接）",
+    "emoji": "🫧",
+    "points": [
+      "分子热运动",
+      "温度的微观本质",
+      "固态液态气态分子差异"
+    ]
+  },
+  "aiIntro": "🫧 看不见的世界也一样守物理定律！分子小到显微镜都难看清，但它一直在动。今天你当一回分子——用随机数体会「热」到底是什么。",
+  "celebrate": "分子运动会闭幕！「温度」这个词你已经懂到骨头里了：它不是魔法数字，是亿亿亿个小分子乱撞的激烈程度。固体抖、液体走、气体飞——化学第一章，你用身体学完了 🫧"
+}

@@ -1,0 +1,120 @@
+{
+  "id": "cross-12",
+  "island": "cross",
+  "order": 33,
+  "title": "一颗种子的生长",
+  "emoji": "🌱",
+  "story": "从种子到开花结果，植物的一生要闯几关？阳光、水、时间，缺一不可。让种子 🌱 慢慢长大：每过一关换一个造型、长大一圈——生命周期就是一段有条件的程序。",
+  "goals": [
+    "了解植物的生命周期",
+    "知道生长需要条件（阳光、水）"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_forever",
+    "island_if",
+    "island_if_else",
+    "island_number",
+    "island_random",
+    "island_costume",
+    "island_change_size",
+    "island_eq",
+    "island_touching_edge"
+  ],
+  "actor": {
+    "costume": "🌱",
+    "x": 0,
+    "y": -100
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "发芽：种子 🌱 等待 1 秒（浇水啦），开始生长——大小改变 20",
+      "hintPrompts": [
+        "先等一下，种子要喝水才能醒"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_change_size"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "长高：重复 3 次 { 大小改变 20， 等待 0.5 }，变成 🌿 茁壮的苗",
+      "hintPrompts": [
+        "长身体要一步一步来"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_repeat"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "向阳开花：走到太阳 ☀️ 附近（光合作用！），变成 🌸 并说「开花啦！」",
+      "hintPrompts": [
+        "植物会朝着阳光长——移到太阳边"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t4",
+      "text": "结果实：最后变成 🍎 说「一颗种子的使命完成了」",
+      "hintPrompts": [
+        "花落结果，种子又进入下一轮生命"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：加一个「如果碰到边缘？那么说 缺水警报！」——环境不合适植物长不好",
+      "hintPrompts": [
+        "用条件积木表达生存条件"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_if"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第二、三学段（3-6年级）",
+    "module": "过程与控制",
+    "points": [
+      "用程序表达生命周期"
+    ]
+  },
+  "subject": {
+    "name": "生物·生命科学",
+    "emoji": "🌱",
+    "points": [
+      "植物的生命周期",
+      "生长的条件",
+      "光合作用初识"
+    ]
+  },
+  "aiIntro": "🌱 生物实验室今天种下一颗种子。它的一生被你写进程序：发芽、长高、开花、结果——每一步都需要条件。这就是生物课说的「生命活动」。",
+  "celebrate": "你的种子走完了一生！从 🌱 到 🍎，生命周期四个阶段你亲手导演。更重要的是：每个阶段都有条件（水、阳光）——生物课的「环境影响生命」，你已经会写进程序了 🌾",
+  "targets": [
+    {
+      "emoji": "☀️",
+      "x": 120,
+      "y": 100
+    }
+  ]
+}

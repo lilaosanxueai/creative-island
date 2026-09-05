@@ -1,0 +1,115 @@
+{
+  "id": "cross-09",
+  "island": "cross",
+  "order": 30,
+  "title": "光的反射定律",
+  "emoji": "🪞",
+  "story": "光照到镜子上会弹回来——「反射角等于入射角」，初中光学第一定律！今天让光斑走一条 45° 的入射光，撞上镜子后转 90° 弹出去（2 × 45°），走出一条完美的对称折线。转错一度都到不了靶心。",
+  "goals": [
+    "掌握光的反射定律",
+    "理解入射角与反射角"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_forever",
+    "island_if",
+    "island_if_else",
+    "island_number",
+    "island_random",
+    "island_costume",
+    "island_change_size",
+    "island_eq",
+    "island_touching_edge"
+  ],
+  "actor": {
+    "costume": "💡",
+    "x": -140,
+    "y": 140,
+    "dir": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "入射光：光斑从左上角 (-140,140) 沿 45° 斜线走到镜面点 🪞 (0,0)",
+      "hintPrompts": [
+        "用「移到」直达 (0,0)——左上到中心就是 45° 方向"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 0
+      }
+    },
+    {
+      "id": "t2",
+      "text": "反射光：到镜面后右转 90 度，走出射光——正好命中右上角靶心 🎯 (140,140)！",
+      "hintPrompts": [
+        "反射要转的角度 = 入射角 + 反射角 = 45 + 45 = 90 度",
+        "右转 90 后朝右上走，移动 200 左右到靶心"
+      ],
+      "check": {
+        "type": "actor_reach",
+        "targetIndex": 1
+      }
+    },
+    {
+      "id": "t3",
+      "text": "总结定律：说「入射角 45° = 反射角 45°！」",
+      "hintPrompts": [
+        "这八个字值一道大题"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：改 30° 入射（起点和角度自己算），看该转多少度才能对称反射",
+      "hintPrompts": [
+        "30° 入射要转 60°（2×30）——起点在更左更低的位置"
+      ],
+      "check": {
+        "type": "manual"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第四学段（7-9年级）",
+    "module": "身边的算法",
+    "points": [
+      "角度参数化"
+    ]
+  },
+  "subject": {
+    "name": "物理·光学（初中）",
+    "emoji": "🪞",
+    "points": [
+      "光的直线传播",
+      "反射角等于入射角",
+      "法线与夹角"
+    ]
+  },
+  "aiIntro": "🪞 激光打到镜子上会怎么走？答案两百多年前就写进了教科书：反射角等于入射角。今天你不是背它——你是那道光，自己走一遍这条对称的路。",
+  "celebrate": "反射定律走通了！45° 进、45° 出，你转的那个 90° 就是两个 45° 的和。物理考试画光路图时，记得你就是那道光 💡",
+  "targets": [
+    {
+      "emoji": "🪞",
+      "x": 0,
+      "y": 0
+    },
+    {
+      "emoji": "🎯",
+      "x": 140,
+      "y": 140
+    }
+  ]
+}

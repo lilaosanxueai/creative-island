@@ -1,0 +1,113 @@
+{
+  "id": "cross-13",
+  "island": "cross",
+  "order": 34,
+  "title": "草原食物链剧场",
+  "emoji": "🦅",
+  "story": "草→虫→鸟→鹰，能量一层层往上走，每层只传 10%！这就是生态系统的能量金字塔。让角色演一部草原大片：每被吃掉一次就变身一次，顺便报数——能量只剩上一层的十分之一。",
+  "goals": [
+    "认识食物链与食物网",
+    "理解能量沿食物链递减（10% 定律）"
+  ],
+  "toolbox": [
+    "island_when_run",
+    "island_say",
+    "island_say_for",
+    "island_move",
+    "island_turn_right",
+    "island_turn_left",
+    "island_goto",
+    "island_wait",
+    "island_play",
+    "island_repeat",
+    "island_forever",
+    "island_if",
+    "island_if_else",
+    "island_number",
+    "island_random",
+    "island_costume",
+    "island_change_size",
+    "island_eq",
+    "island_touching_edge"
+  ],
+  "actor": {
+    "costume": "🌿",
+    "x": 0,
+    "y": 0
+  },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "第一幕·草：青草 🌿 说「我有 1000 份能量」",
+      "hintPrompts": [
+        "起点能量满格"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "t2",
+      "text": "第二幕·虫吃草：变成 🐛，说「我只得到 100 份（十分之一）」",
+      "hintPrompts": [
+        "能量传一层丢九成！"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_costume"
+      }
+    },
+    {
+      "id": "t3",
+      "text": "第三幕·鸟吃虫、鹰吃鸟：依次变成 🐦 和 🦅，各报能量（10 份、1 份）",
+      "hintPrompts": [
+        "1000 → 100 → 10 → 1，每层除以 10"
+      ],
+      "check": {
+        "type": "block_count_min",
+        "block": "island_costume",
+        "count": 3
+      }
+    },
+    {
+      "id": "t4",
+      "text": "点题：鹰说「所以塔尖的我们最少也最珍贵！」",
+      "hintPrompts": [
+        "顶级捕食者数量少的原因"
+      ],
+      "check": {
+        "type": "say_text"
+      }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：给每幕配一个音效（吃掉时 💥），并加一句「分解者 🍄 会把能量还给大地」",
+      "hintPrompts": [
+        "分解者闭合能量循环"
+      ],
+      "check": {
+        "type": "block_used",
+        "block": "island_play"
+      },
+      "optional": true
+    }
+  ],
+  "curriculum": {
+    "stage": "第三学段（5-6年级）",
+    "module": "身边的算法",
+    "points": [
+      "序列化表达能量流动"
+    ]
+  },
+  "subject": {
+    "name": "生物·生态系统",
+    "emoji": "🦅",
+    "points": [
+      "食物链与营养级",
+      "能量流动 10% 定律",
+      "生态平衡初识"
+    ]
+  },
+  "aiIntro": "🦅 草原大片今天开机，你是导演兼主演！剧本只有一条规则：吃与被吃。但藏在剧情里的数字会让吓一跳——为什么鹰那么少？演完你就懂了。",
+  "celebrate": "大片杀青！1000 → 100 → 10 → 1，这条能量衰减链你亲自演过。为什么顶级捕食者最少、为什么要保护食物链底端——生态系统课的中心思想，你已经用节目单理解了 🌾"
+}
