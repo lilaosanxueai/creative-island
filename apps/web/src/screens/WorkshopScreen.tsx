@@ -41,9 +41,9 @@ const FREEPLAY_LESSON: Lesson = {
 };
 
 const IDEAS = [
-  { emoji: '🎈', title: '追泡泡小游戏', desc: '用方向键控制角色去碰天上的气球' },
-  { emoji: '📖', title: '会讲故事的机器人', desc: '让机器人一句一句讲你自己编的故事' },
-  { emoji: '🎹', title: '键盘钢琴', desc: '按不同键播放不同声音，弹一首小曲子' },
+  { emoji: '📊', title: '坐标绘图实验', desc: '用「移到 x: y:」在坐标系里画出图形（数学·位置）' },
+  { emoji: '🎵', title: '音阶练习器', desc: '用音阶积木排出一段旋律（音乐·音阶）' },
+  { emoji: '🧠', title: 'AI 手势控制实验', desc: '训练模型后用「当 AI 认出」控制角色（信息科技·AI）' },
 ];
 
 const SPEED_LABEL: Record<RunSpeed, string> = { slow: '🐢 慢速', normal: '▶ 常速', fast: '🐇 快速' };
@@ -613,10 +613,10 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
             />
           ) : (
             <div className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto rounded-2xl bg-white/90 p-4 shadow-md">
-              <h2 className="text-lg font-black">✨ 今天想做点什么？</h2>
+              <h2 className="text-lg font-black">🧪 学科实验工坊</h2>
               {ideaHint && (
                 <div className="rounded-xl bg-violet-50 p-2.5 text-sm leading-relaxed text-violet-700">
-                  💡 你今天的点子：{ideaHint}——需要什么本领就问旁边的{settings.buddy.name}，或者点下面的灵感卡开工！
+                  🧪 本次实验方向：{ideaHint}——需要什么本领就问旁边的{settings.buddy.name}
                 </div>
               )}
               {IDEAS.map((idea) => (

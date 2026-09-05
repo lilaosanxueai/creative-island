@@ -48,7 +48,7 @@ export default function HomeScreen() {
       <div className="text-center pt-16 pb-10">
         <div className="text-7xl">🏝</div>
         <h1 className="mt-3 text-4xl font-black text-sky-800">AI 创意岛</h1>
-        <p className="mt-2 text-slate-500">用积木编程，和 AI 伙伴一起做出你自己的游戏</p>
+        <p className="mt-2 text-slate-500">对标信息科技与数学课程标准的编程学习岛 · 覆盖小学到高中</p>
       </div>
 
       <div className="mx-auto w-full max-w-3xl px-6 pb-4">

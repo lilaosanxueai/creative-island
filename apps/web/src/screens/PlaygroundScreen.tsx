@@ -237,7 +237,7 @@ export default function PlaygroundScreen() {
               💾 保存 AI 大脑
             </button>
             <button onClick={() => nav('/freeplay')} className="rounded-2xl bg-amber-400 py-2.5 font-bold text-white shadow hover:bg-amber-500">
-              🚀 去自由创造，用「当 AI 认出」积木做手势游戏 →
+              🧪 去实验工坊：把模型接入「当 AI 认出」积木，做手势控制实验 →
             </button>
           </div>
         </div>

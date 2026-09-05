@@ -47,7 +47,7 @@ export default function GalleryScreen() {
         <h2 className="mb-4 text-2xl font-black text-slate-700">🖼 我们的作品墙</h2>
         {projects.length === 0 ? (
           <div className="rounded-3xl bg-white/70 p-10 text-center text-slate-400">
-            还没有作品～去 <a className="font-bold text-sky-600" href="#/freeplay">自由创造</a> 做一个，用「💾 存作品」挂上来！
+            还没有作品～在课程学习中点「💾 存作品」，你的学科项目就会展示在这里！
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
