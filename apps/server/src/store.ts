@@ -50,7 +50,7 @@ function progressFile(profileId: string): string {
 }
 
 export function getProgress(profileId: string): ProfileProgress {
-  return readJson<ProfileProgress>(progressFile(profileId), { profileId, lessons: {}, dailyUsage: {}, lessonDrafts: {} });
+  return readJson<ProfileProgress>(progressFile(profileId), { profileId, lessons: {}, dailyUsage: {}, lessonDrafts: {}, lessonCodes: {} });
 }
 
 export function mergeProgress(profileId: string, patch: {
@@ -59,6 +59,7 @@ export function mergeProgress(profileId: string, patch: {
   completed?: boolean;
   minutesDelta?: number;
   draft?: string;
+  code?: string;
 }): ProfileProgress {
   const cur = getProgress(profileId);
   if (patch.lessonId) {
@@ -75,6 +76,10 @@ export function mergeProgress(profileId: string, patch: {
     cur.lessons[patch.lessonId] = lp;
     if (typeof patch.draft === 'string' && patch.draft.length <= 300_000) {
       cur.lessonDrafts[patch.lessonId] = patch.draft;
+    }
+    if (typeof patch.code === 'string' && patch.code.length <= 100_000) {
+      cur.lessonCodes = cur.lessonCodes ?? {};
+      cur.lessonCodes[patch.lessonId] = patch.code;
     }
   }
   if (patch.minutesDelta && patch.minutesDelta > 0) {
@@ -95,17 +100,17 @@ export function listProjects(profileId: string): Project[] {
   return readJson<Project[]>(projectsFile(profileId), []);
 }
 
-export function saveProject(input: { profileId: string; title: string; xml: string; thumb: string; lessonId?: string; stage?: Project['stage']; projectId?: string }): Project {
+export function saveProject(input: { profileId: string; title: string; xml: string; thumb: string; lessonId?: string; stage?: Project['stage']; code?: string; projectId?: string }): Project {
   const list = listProjects(input.profileId);
   const now = new Date().toISOString();
   let proj = input.projectId ? list.find((p) => p.id === input.projectId) : undefined;
   if (proj) {
-    Object.assign(proj, { title: input.title.trim().slice(0, 30) || proj.title, xml: input.xml, thumb: input.thumb, lessonId: input.lessonId, stage: input.stage, updatedAt: now });
+    Object.assign(proj, { title: input.title.trim().slice(0, 30) || proj.title, xml: input.xml, thumb: input.thumb, lessonId: input.lessonId, stage: input.stage, code: input.code, updatedAt: now });
   } else {
     proj = {
       id: crypto.randomUUID(), profileId: input.profileId,
       title: input.title.trim().slice(0, 30) || '我的作品', xml: input.xml, thumb: input.thumb,
-      lessonId: input.lessonId, stage: input.stage, createdAt: now, updatedAt: now,
+      lessonId: input.lessonId, stage: input.stage, code: input.code, createdAt: now, updatedAt: now,
     };
     list.unshift(proj);
   }

@@ -23,7 +23,7 @@ export const api = {
   updateProgress: (profileId: string, patch: Record<string, unknown>) =>
     req<ProfileProgress>(`/api/progress/${profileId}`, { method: 'PUT', body: JSON.stringify(patch) }),
   projects: (profileId: string) => req<Project[]>(`/api/projects?profileId=${profileId}`),
-  saveProject: (p: { profileId: string; title: string; xml: string; thumb: string; lessonId?: string; stage?: Project['stage']; projectId?: string }) =>
+  saveProject: (p: { profileId: string; title: string; xml: string; thumb: string; lessonId?: string; stage?: Project['stage']; code?: string; projectId?: string }) =>
     req<Project>('/api/projects', { method: 'POST', body: JSON.stringify(p) }),
   deleteProject: (profileId: string, id: string) =>
     req<{ ok: boolean }>(`/api/projects/${id}?profileId=${profileId}`, { method: 'DELETE' }),

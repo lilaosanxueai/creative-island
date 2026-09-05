@@ -45,6 +45,10 @@ export interface CurriculumInfo {
 export interface Lesson {
   id: string;
   island: string;
+  /** 代码模式课：默认进入 Python 编辑器而非积木画布 */
+  codeLesson?: boolean;
+  /** 代码模式课的初始 Python 代码 */
+  starterCode?: string;
   order: number;
   title: string;
   emoji: string;
@@ -83,6 +87,8 @@ export interface ProfileProgress {
   dailyUsage: Record<string, number>;
   /** 每课的画布草稿（XML），离开后自动恢复 */
   lessonDrafts: Record<string, string>;
+  /** 每课的 Python 代码草稿（代码模式），离开后自动恢复 */
+  lessonCodes: Record<string, string>;
 }
 
 export interface Project {
@@ -94,6 +100,8 @@ export interface Project {
   /** 舞台截图 dataURL */
   thumb: string;
   lessonId?: string;
+  /** Python 代码模式保存的作品：放映时直接运行代码 */
+  code?: string;
   /** 保存时的舞台配置，作品墙放映时还原 */
   stage?: { actor: Lesson['actor']; targets?: StageTarget[] };
   /** 给作品点过 ❤️ 的角色 id 列表（家庭点赞） */
@@ -135,6 +143,8 @@ export interface LimitSettings {
   dailyMinutes: number;
   /** 提示严格度：gentle 只给方向 / normal 给搭法 / direct 差一步的答案 */
   hintStrictness: 'gentle' | 'normal' | 'direct';
+  /** 达到每日时长后锁定创作（需家长 PIN 解锁，当日有效）。默认 false 仅提醒 */
+  hardStop?: boolean;
 }
 
 export interface Settings {

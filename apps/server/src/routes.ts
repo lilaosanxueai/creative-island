@@ -48,14 +48,17 @@ export function buildRouter(cfg: AppConfig): Router {
   // ---------- 进度 ----------
   r.get('/progress/:profileId', (req, res) => res.json(store.getProgress(req.params.profileId)));
   r.put('/progress/:profileId', (req, res) => {
-    const { lessonId, tasks, completed, minutesDelta, draft } = req.body ?? {};
+    const { lessonId, tasks, completed, minutesDelta, draft, code } = req.body ?? {};
     if (minutesDelta != null && (typeof minutesDelta !== 'number' || minutesDelta > 5)) {
       return res.status(400).json({ error: 'minutesDelta 每次最多 5 分钟' });
     }
     if (draft != null && typeof draft !== 'string') {
       return res.status(400).json({ error: 'draft 需要是字符串' });
     }
-    res.json(store.mergeProgress(req.params.profileId, { lessonId, tasks, completed, minutesDelta, draft }));
+    if (code != null && typeof code !== 'string') {
+      return res.status(400).json({ error: 'code 需要是字符串' });
+    }
+    res.json(store.mergeProgress(req.params.profileId, { lessonId, tasks, completed, minutesDelta, draft, code }));
   });
 
   // ---------- 作品 ----------
@@ -65,10 +68,10 @@ export function buildRouter(cfg: AppConfig): Router {
     res.json(store.listProjects(profileId));
   });
   r.post('/projects', (req, res) => {
-    const { profileId, title, xml, thumb, lessonId, stage, projectId } = req.body ?? {};
+    const { profileId, title, xml, thumb, lessonId, stage, code, projectId } = req.body ?? {};
     if (!profileId || !xml) return res.status(400).json({ error: '缺少 profileId 或 xml' });
     if ((thumb ?? '').length > 300_000) return res.status(413).json({ error: '截图太大' });
-    res.status(201).json(store.saveProject({ profileId, title, xml, thumb: thumb ?? '', lessonId, stage, projectId }));
+    res.status(201).json(store.saveProject({ profileId, title, xml, thumb: thumb ?? '', lessonId, stage, code, projectId }));
   });
   r.delete('/projects/:id', (req, res) => {
     const profileId = String(req.query.profileId ?? '');
@@ -100,6 +103,7 @@ export function buildRouter(cfg: AppConfig): Router {
       limits: {
         dailyMinutes: Math.min(240, Math.max(5, Number(body.limits.dailyMinutes) || 40)),
         hintStrictness: ['gentle', 'normal', 'direct'].includes(body.limits.hintStrictness) ? body.limits.hintStrictness : 'normal',
+        hardStop: !!body.limits.hardStop,
       },
     }));
   });

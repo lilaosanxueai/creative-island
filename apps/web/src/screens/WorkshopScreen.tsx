@@ -15,6 +15,10 @@ import { playSound, isMuted, setMuted } from '../runtime/sounds.ts';
 import { Executor } from '../runtime/executor.ts';
 import { evaluateTasks, requiredTasksDone, type RunEvidence } from '../runtime/validators.ts';
 import { recognizer } from '../ml/recognizer.ts';
+import { parsePy, PyRunner } from '../runtime/pyinterp.ts';
+import { pyStageApi } from '../runtime/pyBridge.ts';
+import { workspaceToPython } from '../blocks/python.ts';
+import { guideRespond, newGuideState, type GuideState } from '../runtime/guideBrain.ts';
 
 export interface WorkshopMode {
   kind: 'lesson' | 'freeplay';
@@ -69,18 +73,41 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
   const [saveTitle, setSaveTitle] = useState('');
   const [toast, setToast] = useState<string | null>(null);
   const [codeOpen, setCodeOpen] = useState(false);
-  const [codeText, setCodeText] = useState('');
   const [speed, setSpeed] = useState<RunSpeed>(getRunSpeed());
   const [muted, setMutedState] = useState(isMuted());
   const [camOn, setCamOn] = useState(false);
+  const [codeMode, setCodeMode] = useState(false);
+  const [codeText, setCodeText] = useState('');
+  const [codeError, setCodeError] = useState<{ line: number; message: string; hint?: string } | null>(null);
+  const [restOverlay, setRestOverlay] = useState(false);
+  const [restCountdown, setRestCountdown] = useState(0);
+  const [locked, setLocked] = useState(false);
+  const [pinInput, setPinInput] = useState('');
 
   const wsApiRef = useRef<WorkspaceApi | null>(null);
   const stageRef = useRef(new StageState());
   const execRef = useRef<Executor | null>(null);
+  const pyRunnerRef = useRef<PyRunner | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const buddyRef = useRef<BuddyHandle>(null);
   const hiddenVideoRef = useRef<HTMLVideoElement>(null);
   const lastFiredLabel = useRef<string | null>(null);
+  const codeTextRef = useRef(codeText);
+  codeTextRef.current = codeText;
+  const codeModeRef = useRef(codeMode);
+  codeModeRef.current = codeMode;
+  const codeDraftTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const mountTimeRef = useRef(Date.now());
+  const lastRestRef = useRef(Date.now());
+  const guideRef = useRef<GuideState>(newGuideState());
+  const lastActivityRef = useRef(Date.now());
+  const hadBlocksRef = useRef(false);
+  const [ideaHint, setIdeaHint] = useState<string | null>(null);
+
+  const sayGuide = useCallback((ev: Parameters<typeof guideRespond>[0]) => {
+    const line = guideRespond(ev, guideRef.current);
+    if (line) buddyRef.current?.sayLocal(line);
+  }, []);
   const taskDoneRef = useRef(taskDone);
   taskDoneRef.current = taskDone;
   const completedRef = useRef(lessonCompleted);
@@ -103,6 +130,13 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
       setWsReady(false);
       if (!l) { setToast('找不到这一课'); setProgressReady(true); return; }
       setLesson(l);
+      if (mode.kind === 'freeplay') {
+        const idea = localStorage.getItem('island-idea');
+        if (idea) { setIdeaHint(idea); localStorage.removeItem('island-idea'); }
+        else setIdeaHint(null);
+      }
+      setCodeMode(!!l.codeLesson);
+      setCodeText(l.starterCode ?? '');
       stageRef.current.reset(l.actor, l.targets);
       setProgressReady(false);
       if (profile) {
@@ -115,6 +149,8 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
             setLessonCompleted(lp.status === 'completed');
           }
           setDraftXml(p.lessonDrafts?.[l.id] ?? null);
+          const savedCode = p.lessonCodes?.[l.id];
+          if (savedCode) setCodeText(savedCode);
         } catch { /* 首次学习无进度 */ }
       }
       if (alive) setProgressReady(true);
@@ -170,26 +206,98 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
     maybeComplete(next);
   }, [lesson, collectEvidence, maybeComplete]);
 
+  /** 事件（按键/点击/AI识别）按当前模式路由到积木执行器或 Python 运行器 */
+  const fireHat = useCallback((kind: 'key' | 'click' | 'recognized', arg?: string) => {
+    if (codeModeRef.current && pyRunnerRef.current) {
+      pyRunnerRef.current.fire(kind === 'key' ? 'key' : kind === 'click' ? 'click' : 'recognize', arg);
+    } else if (kind === 'key') {
+      void execRef.current?.trigger({ type: 'key', key: arg! });
+    } else if (kind === 'click') {
+      void execRef.current?.trigger({ type: 'click' });
+    } else {
+      void execRef.current?.trigger({ type: 'recognized', label: arg! });
+    }
+  }, []);
+
   const handleRun = () => {
+    if (codeMode) {
+      const { program, error } = parsePy(codeText);
+      if (error || !program) {
+        setCodeError(error ?? { line: 0, message: '代码有点问题' });
+        return;
+      }
+      setCodeError(null);
+      pyRunnerRef.current = new PyRunner(program, pyStageApi(stageRef.current));
+      setRunning(true);
+      void pyRunnerRef.current.run(() => {
+        setRunning(false);
+        revalidate(true);
+        lastActivityRef.current = Date.now();
+        sayGuide({ type: 'first-run', ok: !pyRunnerRef.current?.lastError });
+        if (pyRunnerRef.current?.lastError) setToast(`程序出了点小问题：${pyRunnerRef.current.lastError}`);
+      });
+      return;
+    }
     const exec = execRef.current;
     if (!exec) return;
     setRunning(true);
     void exec.run(() => {
       setRunning(false);
       revalidate(true);
+      lastActivityRef.current = Date.now();
+      sayGuide({ type: 'first-run', ok: !exec.lastError });
       if (exec.lastError) setToast(`程序出了点小问题：${exec.lastError}`);
     });
   };
 
   const handleStop = () => {
     execRef.current?.stop();
+    pyRunnerRef.current?.stop();
     setRunning(false);
     revalidate(true);
+  };
+
+  const switchMode = () => {
+    if (!lesson) return;
+    if (!codeMode && !codeText.trim()) {
+      // 首次进入代码模式：从积木生成（代码课用 starterCode，已预置）
+      const ws = wsApiRef.current?.workspace;
+      setCodeText((ws ? workspaceToPython(ws) : '') || lesson.starterCode || 'say("你好，Python！")\n');
+    }
+    setCodeError(null);
+    setCodeMode((v) => !v);
+    pyRunnerRef.current?.stop();
+    execRef.current?.stop();
+    setRunning(false);
+  };
+
+  const regenerateFromBlocks = () => {
+    if (!confirm('用积木重新生成代码？当前改过的代码会被覆盖。')) return;
+    const ws = wsApiRef.current?.workspace;
+    setCodeText((ws ? workspaceToPython(ws) : '') || 'say("你好，Python！")\n');
+    setCodeError(null);
+  };
+
+  const handleCodeChange = (text: string) => {
+    setCodeText(text);
+    if (codeError) setCodeError(null);
+    if (!lesson || !profile) return;
+    clearTimeout(codeDraftTimer.current);
+    codeDraftTimer.current = setTimeout(() => {
+      void api.updateProgress(profile.id, { lessonId: lesson.id, code: text }).catch(() => {});
+    }, 1500);
   };
 
   // ---------- 工作区变化：校验 + 草稿自动保存 ----------
   const handleWorkspaceChange = useCallback(() => {
     revalidate(false);
+    lastActivityRef.current = Date.now();
+    const counts = wsApiRef.current?.getBlockCounts() ?? {};
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total > 0 && !hadBlocksRef.current) {
+      hadBlocksRef.current = true;
+      sayGuide({ type: 'first-block' });
+    }
     if (!lesson || !profile || !wsApiRef.current) return;
     // 立即快照 XML：防抖等待期间 workspace 可能被销毁（切课/关页）
     const xml = wsApiRef.current.getXml();
@@ -218,7 +326,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
       e.preventDefault();
       if (!stageRef.current.keysHeld.has(k)) {
         stageRef.current.keysHeld.add(k);
-        void execRef.current?.trigger({ type: 'key', key: k });
+        fireHat('key', k);
       }
     };
     const up = (e: KeyboardEvent) => {
@@ -234,21 +342,52 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
     };
   }, [running]);
 
-  // ---------- 使用时长心跳（每分钟上报） ----------
+  // ---------- 使用时长心跳（每分钟上报；超时可选锁定）+ 发呆观察 ----------
   useEffect(() => {
     if (!profile) return;
     const timer = setInterval(() => {
       void api.updateProgress(profile.id, { minutesDelta: 1 })
         .then((p) => {
           const today = new Date().toISOString().slice(0, 10);
-          if ((p.dailyUsage[today] ?? 0) >= settings.limits.dailyMinutes) {
-            setToast('🏖 今天的创作时间到啦，保存好作品，休息一下眼睛吧！');
+          const used = p.dailyUsage[today] ?? 0;
+          if (used >= settings.limits.dailyMinutes) {
+            const unlockedKey = `island-unlocked-${today}`;
+            if (settings.limits.hardStop && !localStorage.getItem(unlockedKey)) {
+              setLocked(true);
+            } else {
+              setToast('🏖 今天的创作时间到啦，保存好作品，休息一下眼睛吧！');
+            }
           }
         })
         .catch(() => {});
     }, 60_000);
     return () => clearInterval(timer);
-  }, [profile, settings.limits.dailyMinutes]);
+  }, [profile, settings.limits.dailyMinutes, settings.limits.hardStop]);
+
+  // 发呆观察：45 秒无活动，伙伴轻轻开口（画布空时换开场引导）
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (running || locked) return;
+      const idleMs = Date.now() - lastActivityRef.current;
+      if (idleMs < 45_000) return;
+      const counts = wsApiRef.current?.getBlockCounts() ?? {};
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+      sayGuide(total === 0 && !codeMode ? { type: 'empty-stage' } : { type: 'idle', seconds: Math.round(idleMs / 1000) });
+      lastActivityRef.current = Date.now(); // 说完重置，避免连续打扰
+    }, 15_000);
+    return () => clearInterval(timer);
+  }, [running, locked, codeMode, sayGuide]);
+
+  const unlockWithPin = async () => {
+    const r = await api.verifyPin(pinInput).catch(() => ({ ok: false }));
+    if (r.ok) {
+      localStorage.setItem(`island-unlocked-${new Date().toISOString().slice(0, 10)}`, '1');
+      setLocked(false);
+      setPinInput('');
+    } else {
+      setToast('PIN 不对哦，请爸爸妈妈来输入');
+    }
+  };
 
   useEffect(() => {
     if (!toast) return;
@@ -273,10 +412,11 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
       await api.saveProject({
         profileId: profile.id,
         title: saveTitle.trim() || `${lesson.title}-${new Date().toLocaleDateString('zh-CN')}`,
-        xml: wsApiRef.current.getXml(),
+        xml: wsApiRef.current?.getXml() ?? '<xml></xml>',
         thumb: snapshot(),
         lessonId: lesson.id === 'freeplay' ? undefined : lesson.id,
         stage: { actor: lesson.actor, targets: lesson.targets },
+        code: codeMode ? codeText : undefined,
       });
       setSaveOpen(false);
       setSaveTitle('');
@@ -359,7 +499,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
         stage.recognizedConfidence = pred.conf;
         if (running && label !== lastFiredLabel.current) {
           lastFiredLabel.current = label;
-          void execRef.current?.trigger({ type: 'recognized', label });
+          fireHat('recognized', label);
         }
       } else {
         stage.recognized = null;
@@ -371,6 +511,42 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
 
   // 离开工作台时关掉摄像头
   useEffect(() => () => { recognizer.stopCamera(); }, []);
+
+  // 卸载时立即保存代码草稿
+  useEffect(() => {
+    return () => {
+      clearTimeout(codeDraftTimer.current);
+      const text = codeTextRef.current;
+      if (lesson && profile && text.trim()) {
+        void api.updateProgress(profile.id, { lessonId: lesson.id, code: text }).catch(() => {});
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson, profile]);
+
+  // ---------- 护眼 20-20-20：连续 20 分钟，远眺 20 秒 ----------
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = Date.now();
+      if (now - mountTimeRef.current >= 20 * 60_000 && now - lastRestRef.current >= 20 * 60_000) {
+        lastRestRef.current = now;
+        setRestCountdown(20);
+        setRestOverlay(true);
+      }
+    }, 30_000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!restOverlay || restCountdown <= 0) return;
+    const t = setTimeout(() => {
+      setRestCountdown((c) => {
+        if (c <= 1) { setRestOverlay(false); return 0; }
+        return c - 1;
+      });
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [restOverlay, restCountdown]);
 
   if (!profile) {
     return <Center><button className="rounded-xl bg-sky-500 px-6 py-3 font-bold text-white" onClick={() => nav('/')}>先选一个角色吧 👋</button></Center>;
@@ -387,9 +563,9 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
         <h1 className="text-lg font-black">{lesson.emoji} {lesson.title}</h1>
         {lesson.tasks.length > 0 && (
           <span className={`rounded-full px-3 py-1 text-sm font-bold ${
-            requiredTasksDone(lesson.tasks, taskDone) ? 'bg-emerald-500 text-white' : 'bg-amber-100 text-amber-800'
+            requiredTasksDone(lesson.tasks, taskDone) ? 'bg-violet-500 text-white' : 'bg-violet-100 text-violet-700'
           }`}>
-            任务 {lesson.tasks.filter((t) => !t.optional && taskDone[t.id]).length}/{lesson.tasks.filter((t) => !t.optional).length}
+            ✨ 发现 {lesson.tasks.filter((t) => !t.optional && taskDone[t.id]).length}/{lesson.tasks.filter((t) => !t.optional).length}
           </span>
         )}
         <div className="ml-auto flex items-center gap-1.5">
@@ -414,6 +590,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
         <span className="mx-1 text-slate-300">|</span>
         <ToolBtn title={muted ? '打开音效' : '关掉音效'} onClick={toggleMute}>{muted ? '🔇' : '🔊'}</ToolBtn>
         <ToolBtn title={camOn ? '关闭 AI 摄像头' : '打开 AI 摄像头（需先在 AI 实验室训练）'} onClick={() => void toggleCam()}>{camOn ? '📷 AI 眼睛开' : '📷 AI 眼睛'}</ToolBtn>
+        <ToolBtn title={codeMode ? '回到积木画布' : '看看积木变成的 Python 代码（可以直接改！）'} onClick={switchMode}>{codeMode ? '🧩 积木模式' : '🐍 代码模式'}</ToolBtn>
         <ToolBtn title="全屏（更像一台游戏机）" onClick={toggleFullscreen}>⛶ 全屏</ToolBtn>
         <span className="ml-auto pr-1 text-xs text-slate-400">画布会自动保存，放心关掉</span>
       </div>
@@ -426,16 +603,22 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
             <TaskPanel
               lesson={lesson}
               taskDone={taskDone}
+              ideaHint={ideaHint}
               onToggleManual={(id) => {
                 const next = { ...taskDoneRef.current, [id]: !taskDoneRef.current[id] };
                 setTaskDone(next);
                 maybeComplete(next);
               }}
-              onAskHint={(text) => buddyRef.current?.askInMode('hint', `我在做任务「${text}」，给我一点提示！`)}
+              onAskHint={(text) => buddyRef.current?.askInMode('hint', `我在做「${text}」，给我一点提示！`)}
             />
           ) : (
             <div className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto rounded-2xl bg-white/90 p-4 shadow-md">
               <h2 className="text-lg font-black">✨ 今天想做点什么？</h2>
+              {ideaHint && (
+                <div className="rounded-xl bg-violet-50 p-2.5 text-sm leading-relaxed text-violet-700">
+                  💡 你今天的点子：{ideaHint}——需要什么本领就问旁边的{settings.buddy.name}，或者点下面的灵感卡开工！
+                </div>
+              )}
               {IDEAS.map((idea) => (
                 <div key={idea.title} className="rounded-xl border border-slate-200 p-3">
                   <div className="text-2xl">{idea.emoji}</div>
@@ -453,26 +636,64 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
           )}
         </div>
 
-        {/* 中：积木编辑器（挂载后按进度显式载入草稿/初始积木） */}
-        <div className="min-w-0 flex-1" key={lesson.id}>
-          {progressReady ? (
-            <BlocklyWorkspace
-              toolbox={toolbox}
-              initialXml={lesson.starterXml}
-              onReady={(api) => {
-                wsApiRef.current = api;
-                execRef.current = new Executor(api.workspace, stageRef.current);
-                (window as unknown as { __islandWs?: unknown }).__islandWs = api;
-                setWsReady(true);
-              }}
-              onChange={handleWorkspaceChange}
-              onFlush={(xml) => {
-                clearTimeout(draftTimer.current);
-                if (profile) void api.updateProgress(profile.id, { lessonId: lesson.id, draft: xml }).catch(() => {});
-              }}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center rounded-2xl bg-white/60 text-slate-400">正在恢复你的画布…</div>
+        {/* 中：积木编辑器 / Python 编辑器（积木保持挂载，切模式不丢状态） */}
+        <div className="relative min-w-0 flex-1" key={lesson.id}>
+          <div className={`h-full ${codeMode ? 'hidden' : ''}`}>
+            {progressReady ? (
+              <BlocklyWorkspace
+                toolbox={toolbox}
+                initialXml={lesson.starterXml}
+                onReady={(api) => {
+                  wsApiRef.current = api;
+                  execRef.current = new Executor(api.workspace, stageRef.current);
+                  (window as unknown as { __islandWs?: unknown }).__islandWs = api;
+                  setWsReady(true);
+                }}
+                onChange={handleWorkspaceChange}
+                onFlush={(xml) => {
+                  clearTimeout(draftTimer.current);
+                  if (profile) void api.updateProgress(profile.id, { lessonId: lesson.id, draft: xml }).catch(() => {});
+                }}
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center rounded-2xl bg-white/60 text-slate-400">正在恢复你的画布…</div>
+            )}
+          </div>
+
+          {codeMode && (
+            <div className="flex h-full min-h-0 flex-col rounded-2xl bg-white shadow-md">
+              <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2 text-sm">
+                <span className="font-bold text-slate-700">🐍 Python 代码</span>
+                <span className="text-xs text-slate-400">和学校里学的 Python 是同一种语言！直接改，点 ▶ 就能跑</span>
+                <div className="ml-auto flex gap-1.5">
+                  {!lesson.codeLesson && (
+                    <button onClick={regenerateFromBlocks} className="rounded-lg bg-slate-100 px-2.5 py-1 font-semibold text-slate-600 hover:bg-slate-200">⟲ 从积木重新生成</button>
+                  )}
+                </div>
+              </div>
+              <textarea
+                value={codeText}
+                onChange={(e) => handleCodeChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const ta = e.currentTarget;
+                    const start = ta.selectionStart;
+                    const next = codeText.slice(0, start) + '    ' + codeText.slice(ta.selectionEnd);
+                    handleCodeChange(next);
+                    requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = start + 4; });
+                  }
+                }}
+                spellCheck={false}
+                placeholder={'say("你好，Python！")\nfor _ in range(4):\n    move(80)\n    turn_right(90)'}
+                className="min-h-0 flex-1 resize-none rounded-b-2xl p-4 font-mono text-[15px] leading-7 text-slate-800 outline-none"
+              />
+              {codeError && (
+                <div className="border-t border-rose-100 bg-rose-50 px-4 py-2 text-sm text-rose-700">
+                  <b>第 {codeError.line} 行</b>：{codeError.message}{codeError.hint ? `（${codeError.hint}）` : ''}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -481,7 +702,7 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
           <Stage
             stage={stageRef.current}
             onCanvasReady={(c) => { canvasRef.current = c; }}
-            onSpriteClick={() => { if (running) void execRef.current?.trigger({ type: 'click' }); }}
+            onSpriteClick={() => { if (running) fireHat('click'); }}
           />
           <div className="flex items-center justify-center gap-4 rounded-2xl bg-white/90 py-3 shadow-md">
             {running ? (
@@ -545,8 +766,8 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
       {celebrate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-2xl">
-            <div className="mb-2 text-6xl">🎉</div>
-            <h2 className="mb-2 text-2xl font-black text-emerald-600">通关啦！</h2>
+            <div className="mb-2 text-6xl">🌟</div>
+            <h2 className="mb-2 text-2xl font-black text-violet-600">新本领 GET！</h2>
             <p className="mb-3 whitespace-pre-wrap text-slate-600">{lesson.celebrate}</p>
             {lesson.curriculum ? (
               <div className="mb-6 rounded-2xl bg-emerald-50 p-3 text-left">
@@ -565,6 +786,40 @@ export default function WorkshopScreen({ mode }: { mode: WorkshopMode }) {
               <button onClick={() => nav('/map')} className="rounded-xl bg-emerald-500 px-4 py-2 font-bold text-white hover:bg-emerald-600">回到地图 🏝</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* 护眼 20-20-20：连续 20 分钟远眺 20 秒 */}
+      {restOverlay && (
+        <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-slate-900 to-sky-900 text-white">
+          <div className="text-7xl">🌌</div>
+          <h2 className="text-2xl font-black">眼睛小休息</h2>
+          <p className="max-w-sm text-center leading-relaxed opacity-80">
+            抬起头，看看窗外<b>最远</b>的地方，眨眨眼～ {restCountdown} 秒后继续冒险
+          </p>
+          <div className="text-5xl font-black tabular-nums">{restCountdown}</div>
+          <button onClick={() => setRestOverlay(false)} className="rounded-xl bg-white/20 px-5 py-2 font-bold hover:bg-white/30">我休息好了</button>
+        </div>
+      )}
+
+      {/* 到时锁定（家长开启 hardStop 后生效，PIN 解锁当日有效） */}
+      {locked && (
+        <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center gap-4 bg-slate-900/95 p-6 text-white">
+          <div className="text-7xl">🌙</div>
+          <h2 className="text-2xl font-black">今天的创作时间用完啦</h2>
+          <p className="max-w-sm text-center text-white/70">作品都保存好了。早点休息，明天的小岛还有新冒险等你！</p>
+          <div className="mt-2 flex gap-2">
+            <input
+              type="password"
+              value={pinInput}
+              onChange={(e) => setPinInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && void unlockWithPin()}
+              placeholder="家长 PIN"
+              className="w-36 rounded-xl border border-white/30 bg-white/10 px-3 py-2 text-center text-xl tracking-widest outline-none"
+            />
+            <button onClick={() => void unlockWithPin()} className="rounded-xl bg-white/20 px-4 py-2 font-bold hover:bg-white/30">解锁</button>
+          </div>
+          <button onClick={() => nav('/map')} className="rounded-xl bg-white/10 px-5 py-2 text-sm hover:bg-white/20">回地图看看作品</button>
         </div>
       )}
 

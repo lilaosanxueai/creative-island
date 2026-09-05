@@ -321,7 +321,16 @@ function SettingsTab({ pin }: { pin: string }) {
           />
           <span className="w-16 text-right font-bold">{settings.limits.dailyMinutes} 分钟</span>
         </div>
-        <p className="mt-1 text-xs text-slate-400">到时后孩子端会收到温柔的休息提醒（不强制锁屏）</p>
+        <p className="mt-1 text-xs text-slate-400">连续使用 20 分钟会自动弹出 20 秒远眺休息（护眼 20-20-20）</p>
+        <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={!!settings.limits.hardStop}
+            onChange={(e) => setSettings({ ...settings, limits: { ...settings.limits, hardStop: e.target.checked } })}
+            className="h-4 w-4 accent-emerald-600"
+          />
+          <span><b>到时锁定</b>：达到每日时长后锁定创作，需要家长 PIN 解锁（当天有效）。不勾选则只提醒不锁定</span>
+        </label>
       </div>
 
       <div>

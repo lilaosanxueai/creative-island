@@ -6,6 +6,13 @@ import { useProfileStore } from '../stores/profile.ts';
 import Header from '../components/Header.tsx';
 import { calcStreak } from '../utils/streak.ts';
 
+const IDEA_CARDS = [
+  { emoji: '🎮', title: '键盘小游戏', desc: '用方向键开小车、躲障碍', hint: '做一个键盘控制的小游戏' },
+  { emoji: '💃', title: '会跳舞的角色', desc: '让它转圈、变身、配节奏', hint: '让角色跳一支舞' },
+  { emoji: '🧠', title: 'AI 手势魔术', desc: '用你的动作控制屏幕（先去 AI 实验室训练）', hint: '用 AI 识别做手势游戏' },
+  { emoji: '🐍', title: '写真代码', desc: '直接用 Python 指挥机器人', hint: '用 Python 代码做点什么' },
+];
+
 export default function MapScreen() {
   const nav = useNavigate();
   const { current: profile } = useProfileStore();
@@ -15,13 +22,13 @@ export default function MapScreen() {
   useEffect(() => {
     if (!profile) { nav('/'); return; }
     void api.lessons().then(setLessons);
-    void api.progress(profile.id).then(setProgress).catch(() => setProgress({ profileId: profile.id, lessons: {}, dailyUsage: {}, lessonDrafts: {} }));
+    void api.progress(profile.id).then(setProgress).catch(() => setProgress({ profileId: profile.id, lessons: {}, dailyUsage: {}, lessonDrafts: {}, lessonCodes: {} }));
   }, [profile, nav]);
 
   if (!profile) return null;
 
   const lessonDone = (id: string) => progress?.lessons[id]?.status === 'completed';
-  const unlocked = (i: number) => i === 0 || lessonDone(lessons[i - 1].id);
+  const nextRec = lessons.find((l) => !lessonDone(l.id)); // 建议下一站，不再上锁
   const allDone = lessons.length > 0 && lessons.every((l) => lessonDone(l.id));
   const streak = calcStreak(progress?.dailyUsage ?? {});
   const today = new Date().toISOString().slice(0, 10);
@@ -33,6 +40,33 @@ export default function MapScreen() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 pb-10">
+        {/* 今天想创造什么：点子优先入口 */}
+        <section className="mb-6">
+          <div className="rounded-3xl bg-white/80 p-6 shadow-md">
+            <h2 className="mb-1 text-2xl font-black text-slate-800">🪄 今天想创造什么？</h2>
+            <p className="mb-4 text-sm text-slate-400">选一个点子直接开工——路上需要什么本领，做的时候伙伴会教你怎么用</p>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {IDEA_CARDS.map((idea) => (
+                <button
+                  key={idea.title}
+                  onClick={() => { localStorage.setItem('island-idea', idea.hint); nav('/freeplay'); }}
+                  className="rounded-2xl border-2 border-slate-100 bg-white p-4 text-left transition hover:-translate-y-1 hover:border-violet-300 hover:shadow-lg"
+                >
+                  <div className="text-3xl">{idea.emoji}</div>
+                  <div className="mt-1.5 font-bold">{idea.title}</div>
+                  <div className="mt-0.5 text-xs leading-relaxed text-slate-400">{idea.desc}</div>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => { localStorage.setItem('island-idea', '让伙伴陪我头脑风暴一个新点子'); nav('/freeplay'); }}
+              className="mt-3 w-full rounded-2xl bg-gradient-to-r from-violet-500 to-sky-400 py-2.5 font-bold text-white shadow hover:opacity-90"
+            >
+              🤖 没有想法？让伙伴给我出点子 →
+            </button>
+          </div>
+        </section>
+
         {/* 创作之火 + 今日时长 */}
         <div className="mb-4 flex items-center justify-center gap-3">
           <span className={`rounded-full px-4 py-1.5 font-bold shadow-sm ${streak >= 3 ? 'bg-orange-100 text-orange-600' : 'bg-white/70 text-slate-500'}`} title="每天都来玩一点，火苗会越长越高">
@@ -44,8 +78,8 @@ export default function MapScreen() {
         {/* 基础岛 */}
         <section className="mb-8">
           <h2 className="mb-4 flex items-center gap-2 text-2xl font-black text-amber-700">
-            <span>🏖</span> 基础岛
-            <span className="text-sm font-normal text-slate-400">编程五大法宝 · 完成一课解锁下一课</span>
+            <span>🧭</span> 基础岛
+            <span className="text-sm font-normal text-slate-400">编程的五种本领，顺着玩或跳着玩都行</span>
           </h2>
           <div className="relative">
             <div className="absolute left-0 right-0 top-1/2 hidden border-t-4 border-dashed border-amber-300 sm:block" />
@@ -53,23 +87,20 @@ export default function MapScreen() {
               {basics.map((l) => {
                 const i = lessons.indexOf(l);
                 const done = lessonDone(l.id);
-                const open = unlocked(i);
+                const rec = nextRec?.id === l.id;
                 return (
                   <button
                     key={l.id}
-                    disabled={!open}
                     onClick={() => nav(`/lesson/${l.id}`)}
-                    className={`w-44 shrink-0 rounded-3xl p-4 text-center shadow-md transition ${
-                      !open ? 'cursor-not-allowed bg-slate-200/60 opacity-70'
-                        : done ? 'bg-emerald-50 ring-4 ring-emerald-400 hover:-translate-y-1'
-                        : 'bg-white hover:-translate-y-1 hover:shadow-xl'
+                    className={`w-44 shrink-0 rounded-3xl p-4 text-center shadow-md transition hover:-translate-y-1 hover:shadow-xl ${
+                      done ? 'bg-emerald-50 ring-4 ring-emerald-400' : rec ? 'bg-amber-50 ring-4 ring-amber-300' : 'bg-white'
                     }`}
                   >
-                    <div className="text-5xl">{open ? l.emoji : '🔒'}</div>
+                    <div className="text-5xl">{l.emoji}</div>
                     <div className="mt-2 font-bold">{i + 1}. {l.title}</div>
                     <div className="mt-1 text-xs text-slate-400">{l.goals[0]}</div>
-                    <div className={`mt-2 inline-block rounded-full px-3 py-0.5 text-xs font-bold ${done ? 'bg-emerald-500 text-white' : open ? 'bg-amber-400 text-white' : 'bg-slate-400 text-white'}`}>
-                      {done ? '✅ 已通关 · 可重玩' : open ? '▶ 开始' : '完成上一课解锁'}
+                    <div className={`mt-2 inline-block rounded-full px-3 py-0.5 text-xs font-bold ${done ? 'bg-emerald-500 text-white' : rec ? 'bg-amber-400 text-white' : 'bg-slate-300 text-white'}`}>
+                      {done ? '✅ 探索过' : rec ? '💡 建议下一站' : '随时去玩'}
                     </div>
                   </button>
                 );
@@ -83,7 +114,7 @@ export default function MapScreen() {
           <section className="mb-8">
             <h2 className="mb-4 flex items-center gap-2 text-2xl font-black text-teal-700">
               <span>🏔</span> 拓展岛
-              <span className="text-sm font-normal text-slate-400">连接数学与信息安全 · 对标校内课本</span>
+              <span className="text-sm font-normal text-slate-400">数学寻宝 · 信息安全 · 还有真 Python</span>
             </h2>
             <div className="relative">
               <div className="absolute left-0 right-0 top-1/2 hidden border-t-4 border-dashed border-teal-300 sm:block" />
@@ -91,23 +122,20 @@ export default function MapScreen() {
                 {extras.map((l) => {
                   const i = lessons.indexOf(l);
                   const done = lessonDone(l.id);
-                  const open = unlocked(i);
+                  const rec = nextRec?.id === l.id;
                   return (
                     <button
                       key={l.id}
-                      disabled={!open}
                       onClick={() => nav(`/lesson/${l.id}`)}
-                      className={`w-44 shrink-0 rounded-3xl p-4 text-center shadow-md transition ${
-                        !open ? 'cursor-not-allowed bg-slate-200/60 opacity-70'
-                          : done ? 'bg-emerald-50 ring-4 ring-emerald-400 hover:-translate-y-1'
-                          : 'bg-white hover:-translate-y-1 hover:shadow-xl'
+                      className={`w-44 shrink-0 rounded-3xl p-4 text-center shadow-md transition hover:-translate-y-1 hover:shadow-xl ${
+                        done ? 'bg-emerald-50 ring-4 ring-emerald-400' : rec ? 'bg-amber-50 ring-4 ring-amber-300' : 'bg-white'
                       }`}
                     >
-                      <div className="text-5xl">{open ? l.emoji : '🔒'}</div>
+                      <div className="text-5xl">{l.emoji}</div>
                       <div className="mt-2 font-bold">{i + 1}. {l.title}</div>
                       <div className="mt-1 text-xs text-slate-400">{l.curriculum ? `${l.curriculum.module}` : l.goals[0]}</div>
-                      <div className={`mt-2 inline-block rounded-full px-3 py-0.5 text-xs font-bold ${done ? 'bg-emerald-500 text-white' : open ? 'bg-teal-400 text-white' : 'bg-slate-400 text-white'}`}>
-                        {done ? '✅ 已通关 · 可重玩' : open ? '▶ 开始' : '完成上一课解锁'}
+                      <div className={`mt-2 inline-block rounded-full px-3 py-0.5 text-xs font-bold ${done ? 'bg-emerald-500 text-white' : rec ? 'bg-amber-400 text-white' : 'bg-slate-300 text-white'}`}>
+                        {done ? '✅ 探索过' : rec ? '💡 建议下一站' : '随时去玩'}
                       </div>
                     </button>
                   );

@@ -1,0 +1,42 @@
+{
+  "id": "extra-03",
+  "island": "extra",
+  "order": 9,
+  "title": "和 Python 打招呼",
+  "emoji": "🐍",
+  "codeLesson": true,
+  "starterCode": "# 欢迎来到 Python 的世界！\n# 这些字就是真正的代码——学校信息技术课教的就是它\n# 点右边的 ▶ 运行，看看会发生什么\n\nsay(\"你好，Python！\")\nwait(0.5)\n\nfor _ in range(4):\n    move(80)\n    turn_right(90)\n    wait(0.3)\n\nsay(\"我用代码画了一个方块！\")\nplay(\"cheer\")\n",
+  "story": "创意岛的码头来了一位新朋友：蟒蛇 Python！它不看积木，只认「文字指令」。别怕——你已经会用积木编程了，代码只是同一件事的另一种写法，而且全世界的大程序员都在用它。",
+  "goals": ["看懂简单的 Python 代码", "能修改代码并运行看结果", "迈出从积木到代码的关键一步"],
+  "toolbox": [],
+  "actor": { "costume": "🤖", "x": -80, "y": -60, "dir": 0 },
+  "tasks": [
+    {
+      "id": "t1",
+      "text": "通读一遍代码，猜猜每行在干什么（拿不准的行可以问右边的伙伴，选 📖 模式）",
+      "hintPrompts": ["for _ in range(4) 的意思和积木「重复 4 次」一模一样", "move(80) 就是「移动 80 步」，括号里的数字叫参数"],
+      "check": { "type": "manual" }
+    },
+    {
+      "id": "t2",
+      "text": "把 say(\"你好，Python！\") 里的字改成你自己想说的话，点 ▶ 运行",
+      "hintPrompts": ["只改引号里面的字，引号别删", "改完记得点 ▶，机器人头顶会冒出你说的话"],
+      "check": { "type": "say_text" }
+    },
+    {
+      "id": "t3",
+      "text": "把 range(4) 改成 range(8)，运行看看图形怎么变",
+      "hintPrompts": ["4 变 8，方块会变成……运行看看！", "如果机器人走出屏幕了，把 move(80) 改小一点"],
+      "check": { "type": "manual" }
+    },
+    {
+      "id": "c1",
+      "text": "⭐ 挑战：在循环里加一行 play(\"ding\")，给图案配上节奏",
+      "hintPrompts": ["照着别的行的样子写：play(\"ding\")，注意缩进要和 move 对齐"],
+      "check": { "type": "manual", "optional": true }
+    }
+  ],
+  "curriculum": { "stage": "第三学段（5-6年级）衔接第四学段", "module": "身边的算法（从积木到代码）", "points": ["从图形化编程过渡到文本编程", "阅读并修改简单 Python 程序", "for 循环的代码写法"] },
+  "aiIntro": "今天是大日子！🐍 你要第一次直接跟 Python 说话了。告诉你一个秘密：代码和积木说的是同一件事——for 就是「重复」，move 就是「移动」。你已经会一半了！",
+  "celebrate": "你会写 Python 了！🎉 这可不是小事——从积木到代码，是每位创作者的成人礼。初中信息技术课的 Python，你已经提前踩过门槛了：for 循环、函数调用、参数，全都亲手改过、跑过！"
+}

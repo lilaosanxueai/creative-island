@@ -8,6 +8,8 @@ import Header from '../components/Header.tsx';
 import Stage from '../components/Stage.tsx';
 import { StageState } from '../runtime/stageState.ts';
 import { Executor } from '../runtime/executor.ts';
+import { parsePy, PyRunner } from '../runtime/pyinterp.ts';
+import { pyStageApi } from '../runtime/pyBridge.ts';
 import '../blocks/definitions.ts';
 import '../blocks/generator.ts';
 
@@ -88,20 +90,28 @@ export default function GalleryScreen() {
 function Player({ project, onClose }: { project: Project; onClose: () => void }) {
   const stageRef = useRef(new StageState());
   const execRef = useRef<Executor | null>(null);
+  const pyRef = useRef<PyRunner | null>(null);
   const [running, setRunning] = useState(false);
 
   useEffect(() => {
     const stage = stageRef.current;
     stage.reset(project.stage?.actor ?? { costume: '🤖', x: 0, y: 0 }, project.stage?.targets);
     let ws: Blockly.Workspace | null = null;
-    try {
-      ws = new Blockly.Workspace();
-      Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(project.xml), ws);
-    } catch {
-      ws = null;
+    let py: PyRunner | null = null;
+    if (project.code) {
+      const { program } = parsePy(project.code);
+      if (program) py = new PyRunner(program, pyStageApi(stage));
+    } else {
+      try {
+        ws = new Blockly.Workspace();
+        Blockly.Xml.domToWorkspace(Blockly.utils.xml.textToDom(project.xml), ws);
+      } catch {
+        ws = null;
+      }
     }
     const exec = ws ? new Executor(ws, stage) : null;
     execRef.current = exec;
+    pyRef.current = py;
 
     const map = (e: KeyboardEvent): string | null => {
       switch (e.key) {
@@ -115,11 +125,12 @@ function Player({ project, onClose }: { project: Project; onClose: () => void })
     };
     const down = (e: KeyboardEvent) => {
       const k = map(e);
-      if (!k || !exec) return;
+      if (!k) return;
       e.preventDefault();
       if (!stage.keysHeld.has(k)) {
         stage.keysHeld.add(k);
-        void exec.trigger({ type: 'key', key: k });
+        if (pyRef.current) pyRef.current.fire('key', k);
+        else void exec?.trigger({ type: 'key', key: k });
       }
     };
     const up = (e: KeyboardEvent) => { const k = map(e); if (k) stage.keysHeld.delete(k); };
@@ -129,11 +140,17 @@ function Player({ project, onClose }: { project: Project; onClose: () => void })
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
       exec?.stop();
+      pyRef.current?.stop();
       ws?.dispose();
     };
   }, [project]);
 
   const run = () => {
+    if (pyRef.current) {
+      setRunning(true);
+      void pyRef.current.run(() => setRunning(false));
+      return;
+    }
     const exec = execRef.current;
     if (!exec) return;
     setRunning(true);
@@ -144,13 +161,13 @@ function Player({ project, onClose }: { project: Project; onClose: () => void })
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="w-full max-w-lg rounded-3xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-xl font-black">🎬 {project.title}</h3>
+          <h3 className="text-xl font-black">🎬 {project.title}{project.code ? ' 🐍' : ''}</h3>
           <button onClick={onClose} className="rounded-xl bg-slate-200 px-3 py-1 font-bold hover:bg-slate-300">✕ 关闭</button>
         </div>
-        <Stage stage={stageRef.current} onSpriteClick={() => { if (running) void execRef.current?.trigger({ type: 'click' }); }} />
+        <Stage stage={stageRef.current} onSpriteClick={() => { if (running) (pyRef.current ? pyRef.current.fire('click') : void execRef.current?.trigger({ type: 'click' })); }} />
         <div className="mt-3 flex items-center justify-center gap-4">
           {running ? (
-            <button onClick={() => { execRef.current?.stop(); setRunning(false); }} className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-500 text-xl text-white shadow">⏹</button>
+            <button onClick={() => { execRef.current?.stop(); pyRef.current?.stop(); setRunning(false); }} className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-500 text-xl text-white shadow">⏹</button>
           ) : (
             <button onClick={run} className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-xl text-white shadow">▶</button>
           )}
